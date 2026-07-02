@@ -26,20 +26,3 @@ def test_resampler_disponibile():
         import soxr  # noqa: F401
     except ImportError:
         from scipy.signal import resample_poly  # noqa: F401
-
-
-def test_seeding_namespaced_riproducibile():
-    """Prototipo della derivazione D14: stesso nome → stessa sequenza,
-    nomi diversi → sequenze indipendenti."""
-    import hashlib
-
-    def rng_for(seed: int, layer_id: str, component: str) -> np.random.Generator:
-        digest = hashlib.sha256(f"{seed}:{layer_id}:{component}".encode()).digest()
-        return np.random.default_rng(int.from_bytes(digest[:8], "little"))
-
-    a1 = rng_for(42, "l1", "duration").random(5)
-    a2 = rng_for(42, "l1", "duration").random(5)
-    b = rng_for(42, "l1", "volume").random(5)
-
-    assert np.array_equal(a1, a2)
-    assert not np.array_equal(a1, b)

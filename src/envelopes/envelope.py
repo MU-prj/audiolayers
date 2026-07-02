@@ -26,3 +26,8 @@ class Envelope:
     def evaluate(self, time: float) -> float:
         """Valore dell'envelope al tempo dato."""
         return float(np.interp(time, self._times, self._values))
+
+    @property
+    def values(self) -> list[float]:
+        """I valori dei breakpoint (per validazione bounds al parse)."""
+        return self._values.tolist()
