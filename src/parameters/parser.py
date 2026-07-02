@@ -17,6 +17,28 @@ from src.shared.exceptions import ParameterBoundError
 from src.shared.seeding import rng_for
 
 
+def create_parameter(name: str, raw_base, raw_range=None, *, layer_id: str,
+                     duration: float, seed,
+                     time_mode: str = "absolute") -> Parameter:
+    """Crea un singolo Parameter validato, con RNG namespaced (D14)."""
+    bounds = get_parameter_definition(name)
+
+    base = build_envelope(raw_base, duration=duration, time_mode=time_mode)
+    _validate(base, name, bounds.min_val, bounds.max_val, "value")
+
+    mod_range = None
+    if raw_range is not None:
+        mod_range = build_envelope(raw_range, duration=duration,
+                                   time_mode=time_mode)
+        _validate(mod_range, name, bounds.min_range, bounds.max_range,
+                  "range")
+
+    return Parameter(
+        name, base=base, bounds=bounds, mod_range=mod_range,
+        rng=rng_for(seed, layer_id, name) if mod_range is not None else None,
+    )
+
+
 def create_layer_parameters(layer_data: dict, *, layer_id: str,
                             duration: float, seed,
                             time_mode: str = "absolute",
@@ -25,25 +47,12 @@ def create_layer_parameters(layer_data: dict, *, layer_id: str,
     """Crea tutti i Parameter di un layer dallo schema dichiarativo."""
     result: dict[str, Parameter] = {}
     for spec in schema or LAYER_PARAMETER_SCHEMA:
-        bounds = get_parameter_definition(spec.name)
-
         raw_base = _get_nested(layer_data, spec.yaml_path, spec.default)
-        base = build_envelope(raw_base, duration=duration, time_mode=time_mode)
-        _validate(base, spec.name, bounds.min_val, bounds.max_val, "value")
-
-        mod_range = None
-        if spec.range_path is not None:
-            raw_range = _get_nested(layer_data, spec.range_path, None)
-            if raw_range is not None:
-                mod_range = build_envelope(raw_range, duration=duration,
-                                           time_mode=time_mode)
-                _validate(mod_range, spec.name, bounds.min_range,
-                          bounds.max_range, "range")
-
-        result[spec.name] = Parameter(
-            spec.name, base=base, bounds=bounds, mod_range=mod_range,
-            rng=rng_for(seed, layer_id, spec.name) if mod_range is not None
-            else None,
+        raw_range = (_get_nested(layer_data, spec.range_path, None)
+                     if spec.range_path is not None else None)
+        result[spec.name] = create_parameter(
+            spec.name, raw_base, raw_range, layer_id=layer_id,
+            duration=duration, seed=seed, time_mode=time_mode,
         )
     return result
 
