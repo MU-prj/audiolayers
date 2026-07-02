@@ -13,11 +13,13 @@ import numpy as np
 import soundfile as sf
 import yaml
 
+from src.audio.pan import pan_stereo
 from src.audio.source_loader import load_mono
 from src.core.fragment_sequence import build_fragment_sequence
 from src.parameters.parser import create_layer_parameters
 from src.shared.seeding import rng_for
 from src.strategies.duration_strategy import build_duration_strategy
+from src.strategies.fragment_envelope import build_fragment_envelope
 from src.strategies.overflow_strategy import build_overflow_strategy
 from src.strategies.selection_strategy import build_selection_strategy
 
@@ -87,6 +89,7 @@ def _render_layer(layer: dict, sample_rate: int, seed) -> np.ndarray:
         layer_id=layer_id, seed=seed,
     )
     overflow = build_overflow_strategy(layer.get("pointer", {}))
+    envelope = build_fragment_envelope(layer.get("fragment", {}))
 
     extent = max(f.onset + f.duration for f in fragments)
     buffer = np.zeros((round(extent * sample_rate), 2), dtype=np.float64)
@@ -101,12 +104,16 @@ def _render_layer(layer: dict, sample_rate: int, seed) -> np.ndarray:
         segment = overflow.read(source, start_frame,
                                 round(frag.duration * sample_rate))
 
-        # Pan mid/side a 0° (D12): centro → L = R = s/√2.
+        # La voce del frammento (M8): gain dB (D10) → inviluppo
+        # anti-click (D11) → pan mid/side (D12). I parametri sono
+        # campionati al tempo di posa, con le loro tendency mask.
+        gain = 10.0 ** (params["volume"].get_value(frag.onset) / 20.0)
+        shaped = envelope.apply(segment, sample_rate) * gain
+        stereo = pan_stereo(shaped, params["pan"].get_value(frag.onset))
+
         start = round(frag.onset * sample_rate)
-        end = min(start + len(segment), len(buffer))
-        panned = segment[: end - start] / np.sqrt(2.0)
-        buffer[start:end, 0] += panned
-        buffer[start:end, 1] += panned
+        end = min(start + len(stereo), len(buffer))
+        buffer[start:end] += stereo[: end - start]
 
     return buffer
 

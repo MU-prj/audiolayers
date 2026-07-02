@@ -73,15 +73,17 @@ def test_output_contiene_audio_non_silenzio(score_and_pool):
     """La sinusoide del pool deve arrivare nell'output: RMS coerente.
 
     Sorgente: sinusoide ampiezza 0.5 → RMS 0.5/√2 ≈ 0.354.
-    Pan a 0° (D12): ogni canale = segnale/√2 → RMS atteso ≈ 0.25.
+    Pan a 0° (D12): ogni canale = segnale/√2 → RMS atteso ≈ 0.25,
+    meno l'energia dei fade dell'inviluppo anti-click di default
+    (raised cosine 8+10 ms su frammenti da 0.5 s, D11) → tolleranza 2%.
     """
     result = _run_cli(score_and_pool["score"], score_and_pool["output"])
     assert result.returncode == 0, f"CLI fallita:\n{result.stderr}"
 
     audio, _ = sf.read(str(score_and_pool["output"]), always_2d=True)
     rms = np.sqrt(np.mean(audio**2, axis=0))
-    assert rms[0] == pytest.approx(0.25, rel=0.01)
-    assert rms[1] == pytest.approx(0.25, rel=0.01)
+    assert rms[0] == pytest.approx(0.25, rel=0.02)
+    assert rms[1] == pytest.approx(0.25, rel=0.02)
 
 
 @pytest.mark.e2e

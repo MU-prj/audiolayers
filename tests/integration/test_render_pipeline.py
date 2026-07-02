@@ -92,6 +92,54 @@ layers:
         assert freq == pytest.approx(880.0, abs=4.0)
 
 
+def test_volume_in_db_scala_l_ampiezza(tmp_path, pool):
+    quiet = render(tmp_path, f"""\
+layers:
+  - layer_id: "q"
+    duration: 1.0
+    pool: "{pool.as_posix()}"
+    volume: -12.0
+    fragment: {{duration: 0.5}}
+""")
+    loud = render(tmp_path, f"""\
+layers:
+  - layer_id: "q"
+    duration: 1.0
+    pool: "{pool.as_posix()}"
+    volume: 0.0
+    fragment: {{duration: 0.5}}
+""")
+    ratio = np.abs(quiet).max() / np.abs(loud).max()
+    assert ratio == pytest.approx(10 ** (-12 / 20), rel=0.01)  # ≈ 0.251
+
+
+def test_pan_45_gradi_tutto_a_sinistra(tmp_path, pool):
+    audio = render(tmp_path, f"""\
+layers:
+  - layer_id: "sx"
+    duration: 1.0
+    pool: "{pool.as_posix()}"
+    pan: 45.0
+    fragment: {{duration: 0.5}}
+""")
+    assert np.abs(audio[:, 0]).max() > 0.3   # tutto sul canale L
+    assert np.abs(audio[:, 1]).max() == pytest.approx(0.0, abs=1e-9)
+
+
+def test_inviluppo_di_default_apre_i_frammenti_da_zero(tmp_path, pool):
+    """Anti-click (D11): il primo campione di ogni frammento è ~0."""
+    audio = render(tmp_path, f"""\
+layers:
+  - layer_id: "ac"
+    duration: 2.0
+    pool: "{pool.as_posix()}"
+    fragment: {{duration: 0.5}}
+""")
+    for onset in (0.0, 0.5, 1.0, 1.5):
+        first = audio[round(onset * SR), 0]
+        assert abs(first) < 1e-6
+
+
 def test_seed_diverso_produce_render_diverso(tmp_path, pool):
     def score(seed):
         return f"""\
