@@ -1,0 +1,14 @@
+# Golden 1 — tutto deterministico: concatenazione, pointer, gain, pan fissi
+sample_rate: 48000
+seed: 1
+layers:
+  - layer_id: "det"
+    duration: 2.0
+    pool: "{POOL}"
+    fill_factor: 1.0
+    fragment:
+      duration: 0.5
+    pointer:
+      start: 0.25
+    volume: -6.0
+    pan: 30.0

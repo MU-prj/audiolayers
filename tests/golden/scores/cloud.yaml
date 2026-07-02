@@ -1,0 +1,22 @@
+# Golden 2 — nuvola stocastica seedata: maschere, async, selezione random
+sample_rate: 48000
+seed: 424242
+layers:
+  - layer_id: "nuvola"
+    duration: 3.0
+    pool: "{POOL}"
+    selection:
+      strategy: random
+    fill_factor: [[0.0, 0.8], [3.0, 2.5]]
+    distribution: [[0.0, 0.2], [3.0, 1.0]]
+    fragment:
+      duration: 0.3
+      duration_range: 0.15
+    pointer:
+      start: 0.5
+      start_range: 0.3
+      overflow: loop
+    volume: -9.0
+    volume_range: 4.0
+    pan: 0.0
+    pan_range: 60.0

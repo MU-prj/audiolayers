@@ -1,8 +1,9 @@
 ---
 slug: project-bootstrap
 type: plan
-status: active
+status: done
 created: 2026-07-02
+completed: 2026-07-02
 tags: [bootstrap, architettura, yaml, tdd]
 ---
 

@@ -18,10 +18,37 @@ gain e pan, secondo il modello delle *tendency masks* di Barry Truax
 - **Riproducibilità**: seed namespaced per componente; seed di sessione
   generato da timestamp e sempre loggato.
 
+## Quickstart
+
+```yaml
+# brano.yaml
+seed: 42
+layers:
+  - layer_id: "nuvola"
+    duration: 30.0
+    pool: "audio/"                          # cartella coi tuoi file
+    fill_factor: [[0, 0.6], [30, 2.5]]      # da rado a denso
+    distribution: 1.0                       # nuvola asincrona
+    fragment: {duration: 0.3, duration_range: 0.15}
+    volume: -9.0
+    volume_range: 4.0
+    pan_range: 60.0
+```
+
+```bash
+python -m src.main brano.yaml -o brano.wav
+```
+
+Reference completa: [docs/reference/yaml.md](docs/reference/yaml.md) ·
+[docs/reference/cli.md](docs/reference/cli.md)
+
 ## Stato
 
-In sviluppo — vedi [docs/plans/](docs/plans/) per il piano di bootstrap e le
-decisioni di design.
+Motore v1 completo (M0–M10): multi-layer, tendency masks su tutti i
+parametri, strategie di durata/selezione/overflow/inviluppo, mix con
+master envelope e report del picco. Suite: 116 test (unit, integration,
+golden, e2e). Le decisioni di design (D1–D20) sono nel
+[plan di bootstrap](docs/plans/done/2026-07-02-001-project-bootstrap-plan.md).
 
 ## Setup
 

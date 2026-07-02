@@ -10,5 +10,8 @@ Organizzata secondo [Diátaxis](https://diataxis.fr/) (come PythonGranularEngine
 
 ## Punto di partenza
 
-- [plans/2026-07-02-001-project-bootstrap-plan.md](plans/2026-07-02-001-project-bootstrap-plan.md)
-  — piano di bootstrap con il registro completo delle decisioni di design (D1–D20)
+- [reference/yaml.md](reference/yaml.md) — **il formato di partitura**: parametri,
+  tendency masks, envelope, bounds, seeding
+- [reference/cli.md](reference/cli.md) — riga di comando, formati, report picco
+- [plans/done/2026-07-02-001-project-bootstrap-plan.md](plans/done/2026-07-02-001-project-bootstrap-plan.md)
+  — piano di bootstrap (completato) con il registro delle decisioni di design (D1–D20)
