@@ -13,5 +13,8 @@ Organizzata secondo [Diátaxis](https://diataxis.fr/) (come PythonGranularEngine
 - [reference/yaml.md](reference/yaml.md) — **il formato di partitura**: parametri,
   tendency masks, envelope, bounds, seeding
 - [reference/cli.md](reference/cli.md) — riga di comando, formati, report picco
+- [explanation/pge-analysis.md](explanation/pge-analysis.md) — analisi di
+  PythonGranularEngine e **roadmap di iniezione** (envelope avanzati, dephase,
+  multi-voice, pitch, loop windows…) con priorità
 - [plans/done/2026-07-02-001-project-bootstrap-plan.md](plans/done/2026-07-02-001-project-bootstrap-plan.md)
   — piano di bootstrap (completato) con il registro delle decisioni di design (D1–D20)
