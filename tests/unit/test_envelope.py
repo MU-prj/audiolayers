@@ -52,3 +52,14 @@ class TestNormalizzazioneInput:
 
         with pytest.raises(InvalidFieldValueError, match="breakpoint"):
             Envelope([])
+
+
+class TestValutazioneVettoriale:
+    def test_evaluate_array_coincide_con_evaluate(self):
+        import numpy as np
+
+        env = Envelope([[0.0, 5.0], [10.0, 40.0], [30.0, 5.0]])
+        times = np.array([0.0, 5.0, 10.0, 20.0, 30.0, 99.0])
+        out = env.evaluate_array(times)
+        assert out.shape == times.shape
+        assert list(out) == [env.evaluate(t) for t in times]

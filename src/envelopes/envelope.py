@@ -27,6 +27,10 @@ class Envelope:
         """Valore dell'envelope al tempo dato."""
         return float(np.interp(time, self._times, self._values))
 
+    def evaluate_array(self, times: np.ndarray) -> np.ndarray:
+        """Valutazione vettoriale (per curve per-campione, es. master)."""
+        return np.interp(times, self._times, self._values)
+
     @property
     def values(self) -> list[float]:
         """I valori dei breakpoint (per validazione bounds al parse)."""

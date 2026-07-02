@@ -28,23 +28,106 @@ DEFAULT_SAMPLE_RATE = 48000
 AUDIO_EXTENSIONS = (".wav", ".aif", ".aiff", ".flac")
 
 
-def render_score(score_path: Path, output_path: Path) -> None:
-    """Renderizza la partitura e scrive il file di output (WAV float32)."""
+def render_score(score_path: Path, output_path: Path, *,
+                 output_format: str | None = None,
+                 bit_depth: str = "32f",
+                 normalize: bool = False) -> None:
+    """Renderizza la partitura e scrive il file di output.
+
+    Default: WAV float32 (D1). `output_format` (wav/aiff/flac) e
+    `bit_depth` (32f/24) arrivano dalla CLI; `normalize` porta il picco
+    a -1 dBFS (mai di default, D16).
+    """
     data = yaml.safe_load(Path(score_path).read_text(encoding="utf-8"))
     sample_rate = int(data.get("sample_rate", DEFAULT_SAMPLE_RATE))
     seed = _resolve_seed(data)
 
-    layer_buffers = [
-        _render_layer(layer, sample_rate, seed) for layer in data["layers"]
-    ]
+    active_layers = _filter_solo_mute(data["layers"])
 
-    total_frames = max(len(buf) for buf in layer_buffers)
+    # Ogni layer ha un onset sulla timeline globale (D15).
+    placed = []
+    for layer in active_layers:
+        onset_frames = round(float(layer.get("onset", 0.0)) * sample_rate)
+        placed.append((onset_frames, _render_layer(layer, sample_rate, seed)))
+
+    total_frames = max(offset + len(buf) for offset, buf in placed)
     mix = np.zeros((total_frames, 2), dtype=np.float64)
-    for buf in layer_buffers:
-        mix[: len(buf)] += buf
+    for offset, buf in placed:
+        mix[offset:offset + len(buf)] += buf
 
+    mix = _apply_master(mix, data.get("master_volume", 0.0), sample_rate)
+    mix = _report_peak_and_normalize(mix, normalize)
+
+    fmt, subtype = _resolve_format(output_path, output_format, bit_depth)
     sf.write(str(output_path), mix.astype(np.float32), sample_rate,
-             subtype="FLOAT")
+             format=fmt, subtype=subtype)
+
+
+def _filter_solo_mute(layers: list) -> list:
+    """Convenzione PGE: se esistono layer in solo, suonano solo quelli;
+    altrimenti suonano tutti tranne i mutati."""
+    def flag(layer, name):
+        return name in layer and layer[name] is not False
+
+    soloed = [l for l in layers if flag(l, "solo")]
+    if soloed:
+        return soloed
+    return [l for l in layers if not flag(l, "mute")]
+
+
+def _apply_master(mix: np.ndarray, master_volume,
+                  sample_rate: int) -> np.ndarray:
+    """master_volume in dB, scalare o envelope (curva per-campione)."""
+    from src.envelopes.envelope import Envelope
+    from src.envelopes.envelope_builder import build_envelope
+
+    master = build_envelope(master_volume)
+    if isinstance(master, Envelope):
+        times = np.arange(len(mix)) / sample_rate
+        gain = 10.0 ** (master.evaluate_array(times) / 20.0)
+        return mix * gain[:, None]
+    return mix * (10.0 ** (master / 20.0))
+
+
+def _report_peak_and_normalize(mix: np.ndarray,
+                               normalize: bool) -> np.ndarray:
+    """Misura il picco e lo RIPORTA (D16); --normalize opzionale."""
+    peak = float(np.abs(mix).max())
+    if peak == 0.0:
+        print("picco: silenzio assoluto")
+        return mix
+    peak_db = 20.0 * np.log10(peak)
+    if peak > 1.0:
+        print(f"CLIPPING: picco {peak_db:+.2f} dBFS "
+              f"-- riduci master_volume di almeno {peak_db:.2f} dB"
+              + (" (o usa --normalize)" if not normalize else ""))
+    else:
+        print(f"picco: {peak_db:+.2f} dBFS")
+    if normalize:
+        target = 10.0 ** (-1.0 / 20.0)  # -1 dBFS
+        mix = mix * (target / peak)
+        print("normalizzato a -1.00 dBFS")
+    return mix
+
+
+_FORMATS = {
+    ".wav": "WAV", ".aiff": "AIFF", ".aif": "AIFF", ".flac": "FLAC",
+}
+
+
+def _resolve_format(output_path: Path, output_format: str | None,
+                    bit_depth: str) -> tuple[str, str]:
+    """Formato dal flag CLI, o dall'estensione, o WAV (D1)."""
+    if output_format is not None:
+        fmt = output_format.upper()
+        if fmt == "AIF":
+            fmt = "AIFF"
+    else:
+        fmt = _FORMATS.get(Path(output_path).suffix.lower(), "WAV")
+    # FLAC non supporta il float: sempre PCM 24 bit.
+    if fmt == "FLAC" or bit_depth == "24":
+        return fmt, "PCM_24"
+    return fmt, "FLOAT"
 
 
 def _resolve_seed(data: dict):
