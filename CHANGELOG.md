@@ -13,6 +13,11 @@ segue il versionamento semantico.
   mini editor breakpoint per gli envelope, render come job asincrono con
   player integrato e download, provisioning `--dig` con un toggle,
   export/import YAML round-trip con la CLI. Stile bianco minimale.
+- GUI: copertura completa delle modalità del motore — modalità ritmica
+  (bpm envelope-abile + pattern) alternativa al grano continuo, solo/mute,
+  time_mode, fill_factor_range, blocco digger per layer (licenza,
+  collection, subject, query Lucene, formati) e pannello info fisso a
+  destra: click sul nome di un parametro → spiegazione.
 
 - Flag `--dig`: provisioning automatico del pool da Internet Archive via
   [archivedigger](https://github.com/MU-prj/archivedigger). Analizza la

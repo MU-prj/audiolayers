@@ -46,6 +46,55 @@ class TestBuildScore:
         assert layer["fragment"]["duration"] == [[0, 0.01], [20, 0.5]]
 
 
+class TestProvision:
+    def test_blocco_digger_entra_nella_partitura(self):
+        stato = stato_minimo()
+        stato["layers"][0]["params"].update({
+            "provision.search.license": {"enabled": True, "value": "cc"},
+            "provision.search.collection": {"enabled": True,
+                                            "value": ["field-recordings"]},
+            "provision.files.prefer": {"enabled": True,
+                                       "value": [["Flac", "WAVE"]]},
+        })
+        layer = build_score(stato)["layers"][0]
+        assert layer["provision"]["search"]["license"] == "cc"
+        assert layer["provision"]["search"]["collection"] == ["field-recordings"]
+        assert layer["provision"]["files"]["prefer"] == [["Flac", "WAVE"]]
+
+    def test_round_trip_del_blocco_digger(self):
+        stato = stato_minimo()
+        stato["layers"][0]["params"]["provision.search.license"] = \
+            {"enabled": True, "value": "cc"}
+        params = parse_score(build_score(stato))["layers"][0]["params"]
+        assert params["provision.search.license"]["value"] == "cc"
+
+
+class TestModalita:
+    def test_rhythm_solo_e_time_mode_passano(self):
+        stato = stato_minimo()
+        del stato["layers"][0]["params"]["fragment.duration"]
+        stato["layers"][0]["params"].update({
+            "fragment.rhythm.bpm": {"enabled": True, "value": [[0, 90], [20, 140]]},
+            "fragment.rhythm.pattern": {"enabled": True, "value": [0.25, 0.125]},
+            "solo": {"enabled": True, "value": True},
+            "time_mode": {"enabled": True, "value": "normalized"},
+        })
+        layer = build_score(stato)["layers"][0]
+        assert layer["fragment"]["rhythm"]["bpm"] == [[0, 90], [20, 140]]
+        assert layer["fragment"]["rhythm"]["pattern"] == [0.25, 0.125]
+        assert layer["solo"] is True
+        assert layer["time_mode"] == "normalized"
+        assert "duration" not in layer["fragment"]  # mutua esclusione
+
+    def test_round_trip_rhythm(self):
+        stato = stato_minimo()
+        del stato["layers"][0]["params"]["fragment.duration"]
+        stato["layers"][0]["params"]["fragment.rhythm.pattern"] = \
+            {"enabled": True, "value": [0.25, 0.125]}
+        params = parse_score(build_score(stato))["layers"][0]["params"]
+        assert params["fragment.rhythm.pattern"]["value"] == [0.25, 0.125]
+
+
 class TestParseScore:
     def test_round_trip_partitura_torna_nei_controlli(self):
         score = build_score(stato_minimo())

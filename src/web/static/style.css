@@ -52,6 +52,21 @@ canvas.envelope { width: 100%; height: 56px; border: 1px solid #ddd;
                   cursor: crosshair; display: block; }
 .envrow { grid-column: 3 / 5; }
 
+.param .name { cursor: help; }
+#infobox {
+  position: fixed; top: 5rem; right: 1rem;
+  width: calc((100vw - 980px) / 2 - 2rem);
+  min-width: 180px; max-width: 300px;
+  border-left: 2px solid #111; padding: .2rem 0 .2rem .8rem;
+  font-size: .78rem; color: #333;
+}
+#infobox h3 { font-size: .8rem; margin-bottom: .3rem; }
+@media (max-width: 1380px) {
+  #infobox { position: fixed; bottom: 3.6rem; top: auto; left: 1rem; right: 1rem;
+             width: auto; max-width: none; background: #fff;
+             border: 1px solid #111; border-left: 4px solid #111; padding: .6rem .8rem; }
+}
+
 footer { position: fixed; bottom: 0; left: 0; right: 0;
          background: #fff; border-top: 1px solid #eee;
          display: flex; gap: 1rem; align-items: center;
