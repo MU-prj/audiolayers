@@ -120,7 +120,7 @@ function drawEnvelope(canvas, def, control, layerDur) {
   });
 }
 
-function attachEnvelopeEditor(canvas, def, control, getDur) {
+function attachEnvelopeEditor(canvas, def, control, getDur, onchange) {
   const toPoint = (ev) => {
     const r = canvas.getBoundingClientRect();
     const t = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)) * getDur();
@@ -159,7 +159,9 @@ function attachEnvelopeEditor(canvas, def, control, getDur) {
     control.value.sort((a, b) => a[0] - b[0]);
     redraw();
   });
-  canvas.addEventListener("pointerup", () => { dragging = -1; });
+  canvas.addEventListener("pointerup", () => {
+    if (dragging >= 0) { dragging = -1; if (onchange) onchange(); }
+  });
   canvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
   redraw();
 }
@@ -251,34 +253,33 @@ function paramRow(def, control, getDur) {
     row.classList.add("wide");   // il box di testo prende tutta la riga
   row.append(chk, name, slot, val);
 
+  // La curva si edita nel pannello inviluppi a sinistra: qui solo il
+  // bottone env (presente SOLO dove il motore supporta le curve) e un
+  // rimando quando la curva è attiva.
   if (def.env) {
     const envBtn = document.createElement("button");
-    envBtn.className = "envbtn"; envBtn.textContent = "env"; envBtn.title = "curva nel tempo";
-    let envRow = null;
-    const openEditor = () => {
-      envBtn.classList.add("on");
-      if (!Array.isArray(control.value))
-        control.value = [[0, control.value], [getDur(), control.value]];
-      slot.innerHTML = ""; val.textContent = "curva";
-      envRow = document.createElement("div");
-      envRow.className = "envrow";
-      const cv = document.createElement("canvas");
-      cv.className = "envelope";
-      envRow.append(cv);
-      row.after(envRow);
-      attachEnvelopeEditor(cv, def, control, getDur);
-    };
+    envBtn.className = "envbtn"; envBtn.textContent = "env";
+    envBtn.title = "curva nel tempo (si edita nel pannello inviluppi)";
+    const isCurve = Array.isArray(control.value);
+    envBtn.classList.toggle("on", isCurve);
     envBtn.onclick = () => {
-      if (envBtn.classList.contains("on")) {
-        envBtn.classList.remove("on");
-        control.value = control.value[0][1];
-        if (envRow) envRow.remove();
-        showScalar();
-      } else openEditor();
+      if (Array.isArray(control.value)) {
+        control.value = control.value[0][1];   // torna fisso
+      } else {
+        control.value = [[0, control.value], [getDur(), control.value]];
+        control.enabled = true;
+        envPanelOpen();
+      }
+      rerender();
     };
     name.append(" ", envBtn);
-    if (Array.isArray(control.value)) { showScalar(); queueMicrotask(openEditor); }
-    else showScalar();
+    if (isCurve) {
+      const link = document.createElement("span");
+      link.className = "curva-link";
+      link.textContent = "curva → inviluppi";
+      link.onclick = envPanelOpen;
+      slot.append(link);
+    } else showScalar();
   } else showScalar();
 
   return row;
@@ -374,7 +375,89 @@ function renderLayers() {
   });
 }
 
-function rerender() { renderGlobals(); renderLayers(); }
+function rerender() { renderGlobals(); renderLayers(); renderEnvPanel(); }
+
+/* ---------- pannello inviluppi (sinistra) ----------
+   Ogni curva attiva è una corsia col suo nome sopra: si edita qui,
+   il pannello principale resta pulito. */
+const envPanel = { open: false };
+
+function envPanelWidth() { return parseInt(localStorage.getItem("envW") || 380, 10); }
+
+function envPanelOpen() {
+  envPanel.open = true;
+  applyPanelsLayout();
+  renderEnvPanel();
+}
+
+function renderEnvPanel() {
+  if (!envPanel.open) return;
+  const box = document.getElementById("env-scroll");
+  box.innerHTML = "";
+  const lanes = [];
+  for (const def of GLOBAL_DEFS) {
+    const c = state.global[def.path];
+    if (def.env && c?.enabled && Array.isArray(c.value))
+      lanes.push({ name: `globale — ${def.label}`, def, control: c, getDur: () => 60 });
+  }
+  for (const layer of state.layers) {
+    const du = layer.params["duration"];
+    const dur = du?.enabled && !Array.isArray(du.value) ? du.value : 20;
+    for (const def of LAYER_DEFS) {
+      const c = layer.params[def.path];
+      if (def.env && c?.enabled && Array.isArray(c.value))
+        lanes.push({ name: `${layer.layer_id} — ${def.label}`,
+                     def, control: c, getDur: () => dur });
+    }
+  }
+  for (const lane of lanes) {
+    const head = document.createElement("div");
+    head.className = "lane-head";
+    const title = document.createElement("span");
+    title.className = "lane-name";
+    title.textContent = lane.name;
+    title.onclick = () => showInfo(lane.def);
+    const range = document.createElement("span");
+    range.className = "lane-range";
+    range.textContent = `${lane.def.min} … ${lane.def.max}`;
+    const fisso = document.createElement("button");
+    fisso.className = "envbtn"; fisso.textContent = "fisso";
+    fisso.title = "torna a valore fisso (primo punto)";
+    fisso.onclick = () => { lane.control.value = lane.control.value[0][1]; rerender(); };
+    head.append(title, range, fisso);
+    const cv = document.createElement("canvas");
+    cv.className = "envelope";
+    box.append(head, cv);
+    attachEnvelopeEditor(cv, lane.def, lane.control, lane.getDur,
+                         () => { renderGlobals(); renderLayers(); });
+  }
+  if (!lanes.length) {
+    const hint = document.createElement("p");
+    hint.className = "muted-hint";
+    hint.textContent = "nessuna curva: premi «env» su un parametro e apparirà qui.";
+    box.append(hint);
+  }
+}
+
+document.getElementById("env-close").onclick = () => {
+  envPanel.open = false; applyPanelsLayout();
+};
+document.getElementById("btn-env").onclick = () => {
+  envPanel.open ? (envPanel.open = false, applyPanelsLayout()) : envPanelOpen();
+};
+document.getElementById("env-divider").addEventListener("pointerdown", ev => {
+  ev.preventDefault();
+  const move = e => {
+    localStorage.setItem("envW", Math.round(e.clientX));
+    applyPanelsLayout(); renderEnvPanel();
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
 
 /* ---------- pannello info ---------- */
 function showInfo(def) {
@@ -411,6 +494,7 @@ async function doRender() {
     player.src = url; player.hidden = false; player.play().catch(() => {});
     const dl = document.getElementById("btn-download");
     dl.href = url; dl.hidden = false;
+    dawNotify(url);
   }, 500);
 }
 
@@ -488,6 +572,230 @@ document.getElementById("file-import").onchange = (ev) => {
   if (ev.target.files[0]) doImport(ev.target.files[0]);
 };
 
+/* ==================== pannello DAW (v2) ====================
+   Finestra a destra, ridimensionabile: forma d'onda o spettrogramma
+   del render, timeline con playhead, e le curve envelope come corsie
+   di automazione (nome sopra, editing senza sporcare il pannello). */
+const daw = {
+  el: document.getElementById("daw"),
+  open: false, view: "wave", url: null, buffer: null, spec: null,
+};
+const DEF_BY_PATH = Object.fromEntries(
+  [...GLOBAL_DEFS, ...ALL_LAYER_DEFS].map(d => [d.path, d]));
+const player = document.getElementById("player");
+
+function dawWidth() { return parseInt(localStorage.getItem("dawW") || 460, 10); }
+
+/* Layout a tre finestre: inviluppi | principale | daw. */
+function applyPanelsLayout() {
+  const root = document.documentElement.style;
+  const dawW = daw.open ? Math.min(Math.max(dawWidth(), 280), window.innerWidth - 380) : 0;
+  const envW = envPanel.open
+    ? Math.min(Math.max(envPanelWidth(), 240), window.innerWidth - dawW - 380) : 0;
+  daw.el.hidden = !daw.open;
+  daw.el.style.width = dawW + "px";
+  root.setProperty("--daw-w", dawW + "px");
+  const ep = document.getElementById("envpanel");
+  ep.hidden = !envPanel.open;
+  ep.style.width = envW + "px";
+  root.setProperty("--env-w", envW + "px");
+}
+
+function dawTotal() {
+  if (daw.buffer) return daw.buffer.duration;
+  let t = 20;
+  for (const l of state.layers) {
+    const on = l.params["onset"], du = l.params["duration"];
+    const onset = on?.enabled && !Array.isArray(on.value) ? on.value : 0;
+    const dur = du?.enabled && !Array.isArray(du.value) ? du.value : 20;
+    t = Math.max(t, onset + dur);
+  }
+  return t;
+}
+
+async function dawLoad(url) {
+  daw.url = url; daw.spec = null;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    const data = await (await fetch(url)).arrayBuffer();
+    daw.buffer = await ctx.decodeAudioData(data);
+  } finally { ctx.close(); }
+  dawDraw();
+}
+
+function dawNotify(url) {
+  if (daw.open) dawLoad(url);
+  else daw.url = url;   // caricato alla prossima apertura
+}
+
+/* --- disegno --- */
+function themeInk() {
+  const dark = document.body.classList.contains("dark");
+  return { ink: dark ? "#f2f2f2" : "#000", paper: dark ? "#111" : "#fff",
+           dim: dark ? "#555" : "#bbb", dark };
+}
+
+function dawDraw() {
+  document.getElementById("daw-empty").hidden = !!daw.buffer;
+  drawRuler(); drawWaveOrSpec();
+}
+
+function drawRuler() {
+  const cv = document.getElementById("daw-ruler");
+  const { ink } = themeInk();
+  const W = cv.width = cv.clientWidth * 2, H = cv.height = 36;
+  const g = cv.getContext("2d");
+  g.clearRect(0, 0, W, H);
+  const total = dawTotal();
+  const step = total > 150 ? 30 : total > 60 ? 10 : total > 20 ? 5 : 1;
+  g.strokeStyle = ink; g.fillStyle = ink; g.font = "16px Courier New";
+  for (let t = 0; t <= total; t += step) {
+    const x = (t / total) * W;
+    g.beginPath(); g.moveTo(x, H); g.lineTo(x, H - 12); g.stroke();
+    g.fillText(`${t}s`, x + 4, H - 16);
+  }
+}
+
+function drawWaveOrSpec() {
+  const cv = document.getElementById("daw-wave");
+  const { ink, paper, dim } = themeInk();
+  const W = cv.width = cv.clientWidth * 2, H = cv.height = 280;
+  const g = cv.getContext("2d");
+  g.fillStyle = paper; g.fillRect(0, 0, W, H);
+  if (!daw.buffer) { return; }
+  const ch = daw.buffer.getChannelData(0);
+  if (daw.view === "wave") {
+    g.strokeStyle = dim;
+    g.beginPath(); g.moveTo(0, H / 2); g.lineTo(W, H / 2); g.stroke();
+    g.fillStyle = ink;
+    const hop = Math.max(1, Math.floor(ch.length / W));
+    for (let x = 0; x < W; x++) {
+      let lo = 1, hi = -1;
+      const base = x * hop, end = Math.min(base + hop, ch.length);
+      for (let i = base; i < end; i++) {
+        const v = ch[i];
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
+      const y1 = (1 - hi) * H / 2, y2 = (1 - lo) * H / 2;
+      g.fillRect(x, y1, 1, Math.max(1, y2 - y1));
+    }
+  } else {
+    if (!daw.spec || daw.spec.width !== W) daw.spec = computeSpec(ch, W, H);
+    g.putImageData(daw.spec, 0, 0);
+  }
+}
+
+/* Spettrogramma: FFT radix-2 (512), finestra di Hann, scala dB in
+   grigio — bianco e nero come tutto il resto. */
+function computeSpec(samples, W, H) {
+  const N = 512, half = N / 2;
+  const hann = new Float32Array(N);
+  for (let i = 0; i < N; i++) hann[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / N));
+  const re = new Float32Array(N), im = new Float32Array(N);
+  const img = new ImageData(W, H);
+  const { dark } = themeInk();
+  const hop = Math.max(1, Math.floor((samples.length - N) / W));
+  for (let x = 0; x < W; x++) {
+    const base = x * hop;
+    for (let i = 0; i < N; i++) {
+      re[i] = (samples[base + i] || 0) * hann[i]; im[i] = 0;
+    }
+    fft(re, im);
+    for (let y = 0; y < H; y++) {
+      // asse log: le basse frequenze respirano come in una DAW
+      const frac = 1 - y / H;
+      const bin = Math.min(half - 1, Math.floor(Math.pow(half, frac)));
+      const mag = Math.hypot(re[bin], im[bin]);
+      const db = 20 * Math.log10(mag + 1e-9);
+      let v = Math.max(0, Math.min(1, (db + 90) / 90));
+      if (!dark) v = 1 - v;               // chiaro: energia = scuro
+      const p = (y * W + x) * 4, c = Math.round(v * 255);
+      img.data[p] = img.data[p + 1] = img.data[p + 2] = c;
+      img.data[p + 3] = 255;
+    }
+  }
+  return img;
+}
+
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {          // bit reversal
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len;
+    const wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < len / 2; k++) {
+        const ur = re[i + k], ui = im[i + k];
+        const vr = re[i + k + len / 2] * cr - im[i + k + len / 2] * ci;
+        const vi = re[i + k + len / 2] * ci + im[i + k + len / 2] * cr;
+        re[i + k] = ur + vr; im[i + k] = ui + vi;
+        re[i + k + len / 2] = ur - vr; im[i + k + len / 2] = ui - vi;
+        const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+      }
+    }
+  }
+}
+
+/* --- trasporto e playhead --- */
+function fmtTime(s) {
+  return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
+}
+setInterval(() => {
+  if (!daw.open || !daw.buffer) return;
+  const frac = player.duration ? player.currentTime / player.duration : 0;
+  const track = document.getElementById("daw-track");
+  document.getElementById("daw-playhead").style.left =
+    (frac * track.clientWidth) + "px";
+  document.getElementById("daw-time").textContent = fmtTime(player.currentTime || 0);
+  document.getElementById("daw-play").textContent = player.paused ? "▶" : "❚❚";
+}, 100);
+
+document.getElementById("daw-play").onclick = () =>
+  player.paused ? player.play() : player.pause();
+document.getElementById("daw-wave").addEventListener("click", ev => {
+  if (!daw.buffer || !player.duration) return;
+  const r = ev.currentTarget.getBoundingClientRect();
+  player.currentTime = ((ev.clientX - r.left) / r.width) * player.duration;
+});
+document.getElementById("daw-view").onclick = () => {
+  daw.view = daw.view === "wave" ? "spec" : "wave";
+  document.getElementById("daw-view").textContent =
+    daw.view === "wave" ? "onda" : "spettro";
+  drawWaveOrSpec();
+};
+
+/* --- apertura, chiusura, resize --- */
+document.getElementById("btn-daw").onclick = () => {
+  daw.open = true; applyPanelsLayout();
+  if (daw.url && !daw.buffer) dawLoad(daw.url); else dawDraw();
+};
+document.getElementById("daw-close").onclick = () => {
+  daw.open = false; applyPanelsLayout();
+};
+document.getElementById("daw-divider").addEventListener("pointerdown", ev => {
+  ev.preventDefault();
+  const move = e => {
+    localStorage.setItem("dawW", Math.round(window.innerWidth - e.clientX));
+    applyPanelsLayout(); dawDraw();
+  };
+  const up = () => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+});
+window.addEventListener("resize", () => { if (daw.open) { applyPanelsLayout(); dawDraw(); } });
+themeBtn.addEventListener("click", () => { if (daw.open) { daw.spec = null; dawDraw(); } });
+
 state.layers.push(newLayer());
 renderGlobals();
 renderLayers();
+applyPanelsLayout();

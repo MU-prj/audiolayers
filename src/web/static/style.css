@@ -11,8 +11,9 @@ body.dark {
 body {
   font: 13px/1.4 "Times New Roman", Times, serif;
   background: var(--bg); color: var(--fg);
-  max-width: 940px; margin: 0 auto; padding: 6px 12px 96px;
 }
+/* colonna centrale: resta centrata nello spazio tra i pannelli */
+#centercol { max-width: 940px; margin: 0 auto; padding: 6px 12px 96px; }
 h1 { font-size: 19px; font-weight: bold; letter-spacing: .02em; }
 h2 { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
 h2::before { content: "» "; color: var(--mut); }
@@ -84,8 +85,8 @@ canvas.envelope { width: 100%; height: 52px; border: 1px solid var(--line);
 .envrow { grid-column: 1 / -1; }
 
 #infobox {
-  position: fixed; top: 84px; right: 10px;
-  width: calc((100vw - 940px) / 2 - 24px);
+  position: fixed; top: 84px; right: calc(var(--daw-w, 0px) + 10px);
+  width: calc((100vw - var(--env-w, 0px) - var(--daw-w, 0px) - 940px) / 2 - 24px);
   min-width: 165px; max-width: 270px;
   border: 1px solid var(--fg); padding: 5px 8px;
   font-size: 12px; background: var(--tip);
@@ -96,6 +97,57 @@ canvas.envelope { width: 100%; height: 52px; border: 1px solid var(--line);
   #infobox { top: auto; bottom: 96px; left: 10px; right: 10px;
              width: auto; max-width: none; }
 }
+
+/* tre finestre: inviluppi | principale | daw — il centro resta centrato */
+body { padding-right: var(--daw-w, 0); padding-left: var(--env-w, 0); }
+
+#envpanel { position: fixed; top: 0; left: 0; bottom: 40px; z-index: 5;
+            background: var(--bg); border-right: 1px solid var(--fg);
+            display: flex; }
+#env-inner { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#env-toolbar { display: flex; gap: 6px; align-items: center;
+               padding: 5px 8px; border-bottom: 1px solid var(--hair);
+               font-size: 12px; }
+#env-scroll { flex: 1; overflow-y: auto; padding: 6px 8px; }
+#env-divider { width: 6px; cursor: col-resize; flex: 0 0 auto;
+               border-left: 1px solid var(--hair); }
+#env-divider:hover { background: var(--hair); }
+.lane-head { display: flex; gap: 8px; align-items: baseline; margin: 8px 0 2px; }
+.lane-head .lane-name { cursor: help; }
+.lane-head .lane-name:hover { text-decoration: underline; color: var(--link); }
+.lane-range { font: 10px "Courier New", monospace; color: var(--mut); flex: 1; }
+.muted-hint { color: var(--mut); font-size: 12px; font-style: italic; padding: 8px 0; }
+.curva-link { font: 11px "Courier New", monospace; color: var(--link);
+              text-decoration: underline; cursor: pointer; }
+
+/* pannello DAW a destra, ridimensionabile */
+#daw { position: fixed; top: 0; right: 0; bottom: 40px; z-index: 5;
+       background: var(--bg); border-left: 1px solid var(--fg);
+       display: flex; }
+#daw-divider { width: 6px; cursor: col-resize; flex: 0 0 auto;
+               border-right: 1px solid var(--hair); }
+#daw-divider:hover { background: var(--hair); }
+#daw-inner { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#daw-toolbar { display: flex; gap: 6px; align-items: center;
+               padding: 5px 8px; border-bottom: 1px solid var(--hair);
+               font-size: 12px; }
+#daw-time { font: 11px "Courier New", monospace; color: var(--mut); }
+#daw-scroll { flex: 1; overflow-y: auto; padding: 6px 8px; }
+#daw-track { position: relative; }
+#daw-ruler { width: 100%; height: 18px; display: block; }
+#daw-wave { width: 100%; height: 140px; display: block;
+            border: 1px solid var(--line); cursor: text; }
+.lane-name { font: 10px "Courier New", monospace; color: var(--mut);
+             margin: 6px 0 1px; }
+canvas.lane { width: 100%; height: 64px; display: block;
+              border: 1px solid var(--hair); cursor: crosshair; }
+#daw-playhead { position: absolute; top: 18px; bottom: 0; width: 1px;
+                background: #c00; pointer-events: none; }
+#daw-empty, #daw-nolanes { color: var(--mut); font-size: 12px;
+                           font-style: italic; padding: 8px 0; }
+
+/* barre in basso: si fermano ai bordi dei pannelli */
+#terminal, footer { right: var(--daw-w, 0); left: var(--env-w, 0); }
 
 /* terminale a tendina, sopra la barra di stato */
 #terminal { position: fixed; bottom: 40px; left: 0; right: 0;
