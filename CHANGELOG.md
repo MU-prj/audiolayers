@@ -13,6 +13,15 @@ segue il versionamento semantico.
   mini editor breakpoint per gli envelope, render come job asincrono con
   player integrato e download, provisioning `--dig` con un toggle,
   export/import YAML round-trip con la CLI. Stile bianco minimale.
+- GUI v2 a tre finestre: pannello **inviluppi** a sinistra (le curve si
+  editano lì come corsie nominate, il pannello principale resta pulito;
+  apri/chiudi, larghezza regolabile) e pannello **daw** a destra col
+  render: forma d'onda ↔ spettrogramma (FFT propria, scala log, b/n),
+  righello temporale, playhead sincronizzato, click per seek, trasporto.
+  La colonna centrale resta sempre centrata.
+- GUI: terminale a tendina (output reale del motore via /api/log),
+  tema chiaro/scuro ☀/☾ persistito, valori scrivibili a mano accanto
+  agli slider, layout compatto web 1.0 × apple.
 - GUI: copertura completa delle modalità del motore — modalità ritmica
   (bpm envelope-abile + pattern) alternativa al grano continuo, solo/mute,
   time_mode, fill_factor_range, blocco digger per layer (licenza,
