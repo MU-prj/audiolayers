@@ -33,8 +33,8 @@ LAYER_PARAMETER_SCHEMA: list[ParameterSpec] = [
     ParameterSpec("pan", "pan", 0.0, "pan_range"),
     ParameterSpec("fill_factor", "fill_factor", 1.0, "fill_factor_range"),
     ParameterSpec("distribution", "distribution", 0.0),
-    ParameterSpec("fragment_duration", "fragment.duration", 0.5,
-                  "fragment.duration_range"),
+    # NB: fragment.duration NON è qui: la assembla la DurationStrategy
+    # (unico punto), perché è mutuamente esclusiva con fragment.rhythm.
     ParameterSpec("pointer_start", "pointer.start", 0.0,
                   "pointer.start_range"),
 ]

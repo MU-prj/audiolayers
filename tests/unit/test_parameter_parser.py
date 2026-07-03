@@ -25,12 +25,18 @@ class TestDefaultDalloSchema:
         assert params["pan"].get_value(0.0) == 0.0
         assert params["fill_factor"].get_value(0.0) == 1.0
         assert params["distribution"].get_value(0.0) == 0.0
-        assert params["fragment_duration"].get_value(0.0) == 0.5
         assert params["pointer_start"].get_value(0.0) == 0.0
 
-    def test_chiave_annidata_letta_con_dot_notation(self):
+    def test_fragment_duration_non_e_nello_schema(self):
+        """La durata del grano è assemblata SOLO dalla DurationStrategy:
+        una seconda copia nello schema sarebbe calcolata e mai letta
+        (e correggerla a metà = bug invisibile)."""
         params = make_params({"fragment": {"duration": 1.25}})
-        assert params["fragment_duration"].get_value(0.0) == 1.25
+        assert "fragment_duration" not in params
+
+    def test_chiave_annidata_letta_con_dot_notation(self):
+        params = make_params({"pointer": {"start": 0.75}})
+        assert params["pointer_start"].get_value(0.0) == 0.75
 
     def test_valore_envelope_nel_yaml(self):
         params = make_params({"fill_factor": [[0.0, 0.5], [30.0, 2.0]]})
