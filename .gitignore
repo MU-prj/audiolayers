@@ -35,3 +35,7 @@ Thumbs.db
 .agents/
 agent/
 skills-lock.json
+
+# Materiale generato/scaricato
+audio/pool/
+out/
