@@ -9,7 +9,7 @@ import pytest
 
 from src.strategies.duration_strategy import (RhythmicDurationStrategy,
                                               TendencyDurationStrategy,
-                                              build_duration_strategy)
+                                              build_duration_strategies)
 from src.parameters.parameter import Parameter
 from src.parameters.parameter_definitions import get_parameter_definition
 from src.shared.exceptions import InvalidFieldValueError
@@ -49,31 +49,41 @@ class TestTendency:
 
 
 class TestFactory:
-    def test_blocco_rhythm_crea_la_strategia_ritmica(self):
-        strat = build_duration_strategy(
+    """La factory ritorna la coppia (grano, ioi): quanto DURA il grano e
+    OGNI QUANTO ne nasce uno. Senza rhythm coincidono; con rhythm la
+    griglia è ritmica e la durata resta controllabile a parte."""
+
+    def test_blocco_rhythm_guida_la_griglia_e_riempie_lo_slot(self):
+        grain, ioi = build_duration_strategies(
             {"rhythm": {"bpm": 120, "pattern": [0.25]}},
             layer_id="l1", duration=30.0, seed=42,
         )
-        assert isinstance(strat, RhythmicDurationStrategy)
+        assert isinstance(ioi, RhythmicDurationStrategy)
+        assert grain is ioi   # senza duration dichiarata, grano = slot
 
     def test_default_e_tendency(self):
-        strat = build_duration_strategy({}, layer_id="l1", duration=30.0,
-                                        seed=42)
-        assert isinstance(strat, TendencyDurationStrategy)
-        assert strat.duration(0, 0.0) == 0.5  # default dallo schema
+        grain, ioi = build_duration_strategies({}, layer_id="l1",
+                                               duration=30.0, seed=42)
+        assert isinstance(grain, TendencyDurationStrategy)
+        assert grain is ioi
+        assert grain.duration(0, 0.0) == 0.5  # default dallo schema
 
-    def test_duration_e_rhythm_insieme_sono_un_errore(self):
-        """Convenzione PGE recente: niente priorità implicite, errore."""
-        with pytest.raises(InvalidFieldValueError, match="rhythm"):
-            build_duration_strategy(
-                {"duration": 0.5, "rhythm": {"bpm": 120, "pattern": [0.25]}},
-                layer_id="l1", duration=30.0, seed=42,
-            )
+    def test_duration_e_rhythm_insieme_compongono(self):
+        """Rhythm decide quando, duration quanto: grani corti su griglia
+        ritmica (staccato granulare) senza dover scegliere tra i due."""
+        grain, ioi = build_duration_strategies(
+            {"duration": 0.05, "rhythm": {"bpm": 120, "pattern": [0.25]}},
+            layer_id="l1", duration=30.0, seed=42,
+        )
+        assert isinstance(ioi, RhythmicDurationStrategy)
+        assert isinstance(grain, TendencyDurationStrategy)
+        assert grain.duration(0, 0.0) == pytest.approx(0.05)
+        assert ioi.duration(0, 0.0) == pytest.approx(0.5)  # 1/4 a 120
 
     def test_rhythm_senza_bpm_o_pattern_e_un_errore(self):
         with pytest.raises(InvalidFieldValueError, match="bpm"):
-            build_duration_strategy({"rhythm": {"pattern": [0.25]}},
-                                    layer_id="l1", duration=30.0, seed=42)
+            build_duration_strategies({"rhythm": {"pattern": [0.25]}},
+                                      layer_id="l1", duration=30.0, seed=42)
         with pytest.raises(InvalidFieldValueError, match="pattern"):
-            build_duration_strategy({"rhythm": {"bpm": 120}},
-                                    layer_id="l1", duration=30.0, seed=42)
+            build_duration_strategies({"rhythm": {"bpm": 120}},
+                                      layer_id="l1", duration=30.0, seed=42)
