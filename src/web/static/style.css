@@ -60,7 +60,7 @@ body.dark .panel { box-shadow: 2px 2px 3px rgba(0,0,0,.55),
 
 /* colonne CSS (riempimento VERTICALE): le coppie logiche — onset/durata,
    pan/pan± — restano impilate una sotto l'altra nella stessa colonna. */
-.params { columns: 2 285px; column-gap: 18px; }
+.params { columns: 285px; column-gap: 18px; }  /* auto: ~3 su 940px */
 .param { break-inside: avoid; }
 .param { display: grid; grid-template-columns: 13px 10em 1fr 4.4em;
          gap: 5px; align-items: center; min-height: 22px; }
