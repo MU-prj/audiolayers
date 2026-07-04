@@ -72,39 +72,29 @@ def catalog() -> dict:
                       "una dissolvenza globale per-campione."),
         ],
         "layer": [
+            _free("onset", "onset (s)", 0.0, minimo=0.0, massimo=36000.0,
+                  step=0.5, ui=(0, 300),
+                  info="Quando il layer entra sulla timeline globale, in "
+                       "secondi. Scalare per natura."),
             _free("duration", "durata (s)", 20.0, minimo=0.001,
                   massimo=36000.0, step=1, ui=(1, 300),
                   info="Durata-obiettivo del layer. Non può essere una "
                        "curva: è l'asse del tempo su cui corrono tutte le "
                        "altre curve. L'ultimo grano non viene mai mozzato, "
                        "quindi il layer può sforare di poco."),
-            _free("onset", "onset (s)", 0.0, minimo=0.0, massimo=36000.0,
-                  step=0.5, ui=(0, 300),
-                  info="Quando il layer entra sulla timeline globale, in "
-                       "secondi. Scalare per natura."),
-            _num("fill_factor", "fill factor", "fill_factor", 1.0,
-                 step=0.05, ui=(0.05, 5),
-                 info="Densità: intervallo tra i grani = durata grano ÷ "
-                      "fill factor. 1 = grani uno dietro l'altro; sotto 1 = "
-                      "silenzi; sopra 1 = sovrapposizioni (crossfade "
-                      "emergenti)."),
-            _num("fill_factor_range", "fill factor ±", "fill_factor", 0.0,
-                 step=0.05, ui=(0, 2.5),
-                 info="Variazione casuale del fill factor per grano: valore "
-                      "estratto uniformemente in [base−range, base+range] "
-                      "(tendency mask di Truax)."),
-            _num("distribution", "distribution", "distribution", 0.0,
-                 info="Regolarità del tempo: 0 = metronomo, 1 = asincrono "
-                      "(intervalli casuali 0..2× l'intervallo sincrono), "
-                      "valori intermedi = miscela."),
+            _free("time_mode", "time mode", "absolute", kind="select",
+                  options=["absolute", "normalized"],
+                  info="Tempi degli envelope del layer: absolute = secondi; "
+                       "normalized = frazioni 0..1 scalate sulla durata "
+                       "(curve riusabili su layer di durate diverse)."),
             _num("fragment.duration", "grano (s)", "fragment_duration", 0.5,
-                 step=0.001, ui=(0.001, 2), mode="tendency",
+                 step=0.001, ui=(0.001, 2),
                  info="Durata di ogni grano, in secondi. Come curva fa "
-                      "accelerare/rallentare il flusso (grani corti = tempo "
-                      "veloce)."),
+                      "accelerare/rallentare il flusso. In modalità ritmica "
+                      "resta attiva: il ritmo decide QUANDO, questa QUANTO "
+                      "(staccato granulare)."),
             _num("fragment.duration_range", "grano ± (s)",
                  "fragment_duration", 0.0, step=0.001, ui=(0, 1),
-                 mode="tendency",
                  info="Variazione casuale della durata del grano attorno al "
                       "valore base. 0 = tutti i grani uguali."),
             _free("fragment.rhythm.bpm", "bpm", 120, env=True, step=1,
@@ -116,11 +106,6 @@ def catalog() -> dict:
                   info="Valori ritmici ciclici in frazioni di semibreve: "
                        "0.25 = semiminima (un movimento), 0.125 = croma, "
                        "0.0625 = semicroma. Separati da virgola."),
-            _free("time_mode", "time mode", "absolute", kind="select",
-                  options=["absolute", "normalized"],
-                  info="Tempi degli envelope del layer: absolute = secondi; "
-                       "normalized = frazioni 0..1 scalate sulla durata "
-                       "(curve riusabili su layer di durate diverse)."),
             _free("fragment.envelope", "inviluppo", "raised_cosine",
                   kind="select", options=available_envelopes(),
                   info="Forma d'ampiezza del grano: raised_cosine = campana "
@@ -134,6 +119,22 @@ def catalog() -> dict:
                  DEFAULT_RELEASE, env=False, step=0.001, ui=(0, 0.1),
                  info="Fade-out del grano in secondi (anti-click). Scalare "
                       "nel motore."),
+            _num("fill_factor", "fill factor", "fill_factor", 1.0,
+                 step=0.05, ui=(0.05, 5),
+                 info="Densità: intervallo tra i grani = durata grano ÷ "
+                      "fill factor. 1 = grani uno dietro l'altro; sotto 1 = "
+                      "silenzi; sopra 1 = sovrapposizioni (crossfade "
+                      "emergenti)."),
+            _num("fill_factor_range", "fill factor ±", "fill_factor", 0.0,
+                 step=0.05, ui=(0, 2.5),
+                 info="Variazione casuale del fill factor per grano: valore "
+                      "estratto uniformemente in [base−range, base+range] "
+                      "(tendency mask di Truax)."),
+            _num("distribution", "distribution", "distribution", 0.0,
+                 ui=(0, 2),
+                 info="Regolarità del tempo: 0 = metronomo, 1 = asincrono "
+                      "(Truax: 0..2× il sincrono), oltre 1 lo spread si "
+                      "amplifica fino a 0..4× — grappoli e buchi marcati."),
             _num("pointer.start", "pointer", "pointer_start", 0.0,
                  info="Punto di lettura nel file sorgente: 0 = inizio, "
                       "0.5 = metà, 1 = fine. Come curva attraversa il file "

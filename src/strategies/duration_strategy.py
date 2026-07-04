@@ -50,23 +50,25 @@ class RhythmicDurationStrategy(DurationStrategy):
         return value * WHOLE_NOTE_BEATS * beat_seconds
 
 
-def build_duration_strategy(fragment_block: dict, *, layer_id: str,
-                            duration: float, seed,
-                            time_mode: str = "absolute") -> DurationStrategy:
-    """Factory dal blocco YAML `fragment` (D17).
+def build_duration_strategies(fragment_block: dict, *, layer_id: str,
+                              duration: float, seed,
+                              time_mode: str = "absolute",
+                              ) -> tuple[DurationStrategy, DurationStrategy]:
+    """Factory dal blocco YAML `fragment` (D17): coppia (grano, ioi).
 
-    `duration` (tendency) e `rhythm` sono mutuamente esclusivi: entrambi
-    presenti → errore esplicito (convenzione PGE recente: niente
-    priorità implicite).
+    - `grano` decide quanto DURA ogni frammento;
+    - `ioi` decide OGNI QUANTO ne nasce uno (prima di fill_factor).
+
+    Senza `rhythm` coincidono (il flusso classico). Con `rhythm` la
+    griglia degli onset è ritmica; se `duration`/`duration_range` sono
+    dichiarati, la lunghezza del grano resta controllabile a parte
+    (staccato granulare), altrimenti il grano riempie lo slot.
     """
     has_rhythm = "rhythm" in fragment_block
+    has_tendency = ("duration" in fragment_block
+                    or "duration_range" in fragment_block)
 
-    if has_rhythm and "duration" in fragment_block:
-        raise InvalidFieldValueError(
-            "'fragment.duration' e 'fragment.rhythm' sono mutuamente "
-            "esclusivi: dichiara solo uno dei due"
-        )
-
+    rhythmic = None
     if has_rhythm:
         rhythm = fragment_block["rhythm"]
         if "bpm" not in rhythm:
@@ -75,7 +77,9 @@ def build_duration_strategy(fragment_block: dict, *, layer_id: str,
             raise InvalidFieldValueError(
                 "'fragment.rhythm' richiede un 'pattern' non vuoto"
             )
-        return RhythmicDurationStrategy(rhythm["bpm"], rhythm["pattern"])
+        rhythmic = RhythmicDurationStrategy(rhythm["bpm"], rhythm["pattern"])
+        if not has_tendency:
+            return rhythmic, rhythmic
 
     parameter = create_parameter(
         "fragment_duration",
@@ -84,4 +88,5 @@ def build_duration_strategy(fragment_block: dict, *, layer_id: str,
         layer_id=layer_id, duration=duration, seed=seed,
         time_mode=time_mode,
     )
-    return TendencyDurationStrategy(parameter)
+    grain = TendencyDurationStrategy(parameter)
+    return grain, (rhythmic if rhythmic is not None else grain)

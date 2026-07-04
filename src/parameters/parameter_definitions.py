@@ -25,8 +25,10 @@ PARAMETERS: dict[str, ParameterBounds] = {
     # spaziatura e tessuto (D2, D3)
     "fill_factor": ParameterBounds(min_val=0.001, max_val=50.0,
                                    max_range=25.0),
-    "distribution": ParameterBounds(min_val=0.0, max_val=1.0,
-                                    max_range=1.0),
+    # Fino a 1 = Truax classico; 1..2 = spread amplificato (nuvole
+    # con grappoli e buchi marcati).
+    "distribution": ParameterBounds(min_val=0.0, max_val=2.0,
+                                    max_range=2.0),
     # frammento
     "fragment_duration": ParameterBounds(min_val=0.001, max_val=600.0,
                                          max_range=300.0),

@@ -12,15 +12,17 @@ import pytest
 from src.core.fragment_sequence import FragmentSpec, build_fragment_sequence
 from src.parameters.parser import create_parameter
 from src.shared.seeding import rng_for
-from src.strategies.duration_strategy import build_duration_strategy
+from src.strategies.duration_strategy import build_duration_strategies
 
 
 def make_sequence(target=2.0, fragment_block=None, fill_factor=1.0,
                   distribution=0.0, seed=42, layer_id="l1"):
     kwargs = dict(layer_id=layer_id, duration=target, seed=seed)
+    grain, ioi = build_duration_strategies(
+        fragment_block or {"duration": 0.5}, **kwargs)
     return build_fragment_sequence(
-        duration_strategy=build_duration_strategy(
-            fragment_block or {"duration": 0.5}, **kwargs),
+        duration_strategy=grain,
+        ioi_strategy=ioi,
         fill_factor=create_parameter("fill_factor", fill_factor, **kwargs),
         distribution=create_parameter("distribution", distribution, **kwargs),
         target_duration=target,
@@ -82,3 +84,38 @@ class TestRegimeStocastico:
         # nella prima metà gli IOI sono quasi sincroni, nella seconda variano
         first, second = iois[: len(iois) // 2], iois[len(iois) // 2:]
         assert np.std(first) < np.std(second)
+
+
+class TestGrigliaRitmicaConGranoIndipendente:
+    def test_rhythm_decide_gli_onset_duration_la_lunghezza(self):
+        """Griglia da 0.5 s (1/4 a 120), grani corti da 0.05 s: gli onset
+        seguono il ritmo, le durate la tendency mask."""
+        frags = make_sequence(target=2.0, fragment_block={
+            "duration": 0.05,
+            "rhythm": {"bpm": 120, "pattern": [0.25]},
+        })
+        onsets = [round(f.onset, 6) for f in frags]
+        assert onsets == [0.0, 0.5, 1.0, 1.5]
+        assert all(abs(f.duration - 0.05) < 1e-9 for f in frags)
+
+
+class TestDistributionEstrema:
+    def test_oltre_uno_lo_spread_si_amplifica(self):
+        """d=2: gli intervalli possono superare di molto il doppio
+        dell'IOI sincrono (spread 0..4x), cosa impossibile con d=1."""
+        def spread(dist):
+            frags = make_sequence(target=60.0, distribution=dist,
+                                  fragment_block={"duration": 0.5})
+            iois = np.diff([f.onset for f in frags])
+            return float(iois.max())
+
+        assert spread(2.0) > 2.0 * 0.5 + 1e-6   # oltre il tetto di d=1
+        assert spread(2.0) > spread(1.0)
+
+    def test_fino_a_uno_comportamento_invariato(self):
+        """d=1 resta il Truax classico: IOI in [0, 2x]. (I golden
+        proteggono l'identita' bit a bit dei casi esistenti.)"""
+        frags = make_sequence(target=60.0, distribution=1.0,
+                              fragment_block={"duration": 0.5})
+        iois = np.diff([f.onset for f in frags])
+        assert iois.max() <= 1.0 + 1e-9

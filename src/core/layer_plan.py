@@ -12,7 +12,7 @@ from src.core.fragment_sequence import FragmentSpec, build_fragment_sequence
 from src.parameters.parameter import Parameter
 from src.parameters.parser import create_layer_parameters
 from src.shared.seeding import rng_for
-from src.strategies.duration_strategy import build_duration_strategy
+from src.strategies.duration_strategy import build_duration_strategies
 
 
 def active_layers(layers: list) -> list:
@@ -46,12 +46,13 @@ def build_layer_plan(layer: dict, seed) -> LayerPlan:
         layer, layer_id=layer_id, duration=target_duration, seed=seed,
         time_mode=time_mode,
     )
-    duration_strategy = build_duration_strategy(
+    grain_strategy, ioi_strategy = build_duration_strategies(
         layer.get("fragment", {}), layer_id=layer_id,
         duration=target_duration, seed=seed, time_mode=time_mode,
     )
     fragments = build_fragment_sequence(
-        duration_strategy=duration_strategy,
+        duration_strategy=grain_strategy,
+        ioi_strategy=ioi_strategy,
         fill_factor=params["fill_factor"],
         distribution=params["distribution"],
         target_duration=target_duration,

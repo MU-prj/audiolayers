@@ -30,8 +30,15 @@ def build_fragment_sequence(*, duration_strategy: DurationStrategy,
                             fill_factor: Parameter,
                             distribution: Parameter,
                             target_duration: float,
-                            rng) -> list[FragmentSpec]:
-    """Genera la sequenza di FragmentSpec per un layer."""
+                            rng,
+                            ioi_strategy: DurationStrategy | None = None,
+                            ) -> list[FragmentSpec]:
+    """Genera la sequenza di FragmentSpec per un layer.
+
+    `ioi_strategy` (default: la stessa del grano) decide la base
+    dell'intervallo tra onset: con la griglia ritmica gli onset seguono
+    il pattern mentre la durata del grano resta indipendente.
+    """
     fragments: list[FragmentSpec] = []
     t = 0.0
     index = 0
@@ -39,11 +46,20 @@ def build_fragment_sequence(*, duration_strategy: DurationStrategy,
         dur = duration_strategy.duration(index, t)
         fragments.append(FragmentSpec(onset=t, duration=dur))
 
-        ioi_sync = dur / fill_factor.get_value(t)
+        # Mai richiamare la stessa strategy due volte: una tendency mask
+        # estrarrebbe un secondo valore (draw in piu' = golden rotti).
+        if ioi_strategy is None or ioi_strategy is duration_strategy:
+            base = dur
+        else:
+            base = ioi_strategy.duration(index, t)
+        ioi_sync = base / fill_factor.get_value(t)
         d = distribution.get_value(t)
         if d > 0.0:
-            ioi_async = rng.uniform(0.0, 2.0 * ioi_sync)
-            ioi = (1.0 - d) * ioi_sync + d * ioi_async
+            # Truax fino a 1 (uniforme 0..2x); oltre 1 lo spread si
+            # amplifica (0..2x*d): nuvole con buchi e grappoli marcati.
+            ioi_async = rng.uniform(0.0, 2.0 * ioi_sync * max(1.0, d))
+            blend = min(d, 1.0)
+            ioi = (1.0 - blend) * ioi_sync + blend * ioi_async
         else:
             ioi = ioi_sync
 
