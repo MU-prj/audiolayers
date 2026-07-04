@@ -8,6 +8,20 @@ segue il versionamento semantico.
 
 ### Changed
 
+- Griglia ritmica e durata del grano ora componibili: `fragment.rhythm`
+  decide quando nasce un grano, `fragment.duration`(+range) quanto dura
+  (staccato granulare). Niente più mutua esclusione.
+- `distribution` estesa fino a 2: oltre 1 lo spread asincrono si
+  amplifica (0..2×IOI×d), nuvole con grappoli e buchi marcati.
+- GUI: parametri riordinati per criterio (tempo → grano → tessuto →
+  sorgente → uscita), grano visibile anche in modalità ritmica,
+  riquadro info incastonato in alto a destra (bianco), effetto rilievo
+  3D sui pannelli layer, editor curve: click secco rimuove il punto,
+  tasto destro apre l'editor manuale di ascissa/ordinata (fix anche al
+  bug dei punti che si scambiavano durante il drag).
+
+### Changed
+
 - Deepening architetturale (fonte unica dei parametri): nuovo catalogo
   `src/parameters/catalog.py` esposto come `/api/params` — la GUI genera
   i controlli dal motore, le tabelle JavaScript duplicate sono sparite

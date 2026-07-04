@@ -92,31 +92,91 @@ function attachEnvelopeEditor(canvas, def, control, getDur, onchange) {
     return best;
   };
   let dragging = -1;
+  let moved = false;
+  let wasExisting = false;
   const redraw = () => drawEnvelope(canvas, def, control, getDur());
   canvas.addEventListener("pointerdown", (ev) => {
     const hit = nearest(ev);
-    if (ev.button === 2 || ev.detail === 2) {           // destro/doppio: rimuovi
-      if (hit >= 0 && control.value.length > 2) { control.value.splice(hit, 1); redraw(); }
+    if (ev.button === 2) {                 // destro: edita ascissa/ordinata
+      if (hit >= 0) openPointEditor(ev, def, control, hit, getDur(),
+                                    () => { redraw(); if (onchange) onchange(); });
       return;
     }
+    moved = false;
+    wasExisting = hit >= 0;
     if (hit >= 0) { dragging = hit; }
-    else { control.value.push(toPoint(ev));
-           control.value.sort((a, b) => a[0] - b[0]);
-           dragging = control.value.findIndex(p => p[0] === toPoint(ev)[0]); }
+    else {
+      const p = toPoint(ev);
+      control.value.push(p);
+      control.value.sort((a, b) => a[0] - b[0]);
+      dragging = control.value.indexOf(p);
+    }
     canvas.setPointerCapture(ev.pointerId);
     redraw();
   });
   canvas.addEventListener("pointermove", (ev) => {
     if (dragging < 0) return;
-    control.value[dragging] = toPoint(ev);
+    const p = toPoint(ev);
+    moved = true;
+    control.value[dragging] = p;
     control.value.sort((a, b) => a[0] - b[0]);
+    dragging = control.value.indexOf(p);   // il punto puo' aver scavalcato
     redraw();
   });
   canvas.addEventListener("pointerup", () => {
-    if (dragging >= 0) { dragging = -1; if (onchange) onchange(); }
+    if (dragging < 0) return;
+    // Click secco su un punto esistente = rimozione (minimo 2 punti).
+    if (!moved && wasExisting && control.value.length > 2)
+      control.value.splice(dragging, 1);
+    dragging = -1;
+    redraw();
+    if (onchange) onchange();
   });
   canvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
   redraw();
+}
+
+/* Popup per editare a mano ascissa (tempo) e ordinata (valore) di un
+   punto: tasto destro sul pallino. */
+function openPointEditor(ev, def, control, index, dur, apply) {
+  document.getElementById("ptedit")?.remove();
+  const [t0, v0] = control.value[index];
+  const box = document.createElement("div");
+  box.id = "ptedit";
+  box.style.left = Math.min(ev.clientX, window.innerWidth - 190) + "px";
+  box.style.top = (ev.clientY + 8) + "px";
+  const mk = (label, val) => {
+    const l = document.createElement("label");
+    l.textContent = label;
+    const i = document.createElement("input");
+    i.type = "number"; i.value = val; i.step = "any";
+    l.append(i);
+    box.append(l);
+    return i;
+  };
+  const it = mk("t (s)", t0);
+  const iv = mk("valore", v0);
+  const ok = document.createElement("button");
+  ok.textContent = "ok";
+  const close = () => box.remove();
+  const commit = () => {
+    const t = Math.max(0, Math.min(dur, parseFloat(it.value)));
+    const v = parseFloat(iv.value);
+    if (!isNaN(t) && !isNaN(v)) {
+      control.value[index] = [Number(t.toFixed(3)), Number(v.toFixed(4))];
+      control.value.sort((a, b) => a[0] - b[0]);
+      apply();
+    }
+    close();
+  };
+  ok.onclick = commit;
+  box.addEventListener("keydown", e => {
+    if (e.key === "Enter") commit();
+    if (e.key === "Escape") close();
+  });
+  box.append(ok);
+  document.body.append(box);
+  it.focus(); it.select();
 }
 
 /* ---------- righe parametro ---------- */
@@ -269,11 +329,13 @@ function renderLayers() {
     }
     mode.onchange = () => {
       const rhythm = mode.value === "rhythm";
-      for (const p of ["fragment.duration", "fragment.duration_range"])
-        layer.params[p].enabled = false;
+      // Il grano (duration/range) resta disponibile in ENTRAMBE le
+      // modalità: il ritmo decide quando, il grano quanto dura.
       for (const p of ["fragment.rhythm.bpm", "fragment.rhythm.pattern"])
         layer.params[p].enabled = rhythm;
-      if (!rhythm) layer.params["fragment.duration"].enabled = true;
+      if (!rhythm && !layer.params["fragment.duration"].enabled
+          && Array.isArray(layer.params["fragment.duration"].value) === false)
+        layer.params["fragment.duration"].enabled = true;
       renderLayers();
     };
     const flags = document.createElement("span");
@@ -411,8 +473,8 @@ function renderEnvPanel() {
       rerender();
     };
     const fisso = document.createElement("button");
-    fisso.className = "envbtn"; fisso.textContent = "fisso";
-    fisso.title = "torna a valore fisso (primo punto)";
+    fisso.className = "envbtn"; fisso.textContent = "×";
+    fisso.title = "chiudi la curva: torna a valore fisso (primo punto)";
     fisso.onclick = () => { lane.control.value = lane.control.value[0][1]; rerender(); };
     head.append(title, range, reset, fisso);
     const cv = document.createElement("canvas");
@@ -458,10 +520,7 @@ function showInfo(def) {
 }
 
 /* ---------- azioni ---------- */
-const status = (msg, err) => {
-  const el = document.getElementById("status");
-  el.textContent = msg; el.classList.toggle("error", !!err);
-};
+const status = () => {};   // niente scritte in basso: parla il terminale
 
 async function doRender() {
   status("render in corso…");

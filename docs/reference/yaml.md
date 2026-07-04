@@ -88,7 +88,9 @@ distribution: 0.0       # 0 = metronomo, 1 = asincrono (uniforme 0..2×IOI)
 
 - `fill_factor` = 1 → frammenti back-to-back; < 1 → silenzi; > 1 →
   sovrapposizione (gli inviluppi producono crossfade emergenti).
-- `distribution` è il blend lineare Truax tra IOI sincrono e asincrono.
+- `distribution` è il blend lineare Truax tra IOI sincrono e asincrono
+  fino a 1; da 1 a 2 lo spread asincrono si amplifica (uniforme
+  0..2×IOI×d): grappoli e buchi via via più marcati.
 - Entrambi envelope-abili: `fill_factor: [[0, 0.5], [60, 3.0]]` infittisce
   il tessuto lungo il brano.
 
@@ -98,7 +100,8 @@ distribution: 0.0       # 0 = metronomo, 1 = asincrono (uniforme 0..2×IOI)
 fragment:
   duration: 0.5          # apertura (s) — tendency mask
   duration_range: 0.2
-  # OPPURE (mutuamente esclusivi, entrambi → errore):
+  # E/O la griglia ritmica (componibili: rhythm decide QUANDO nasce
+  # un grano, duration QUANTO dura; senza duration il grano riempie lo slot):
   rhythm:
     bpm: 120             # scalare o envelope (accelerando/ritardando)
     pattern: [0.25, 0.125, 0.125, 0.5]   # frazioni di semibreve, ciclico
@@ -167,7 +170,7 @@ Pan mid/side a potenza costante: `L² + R² = s²` a ogni angolo.
 | Parametro | Min | Max | Max range |
 |---|---|---|---|
 | `fill_factor` | 0.001 | 50 | 25 |
-| `distribution` | 0 | 1 | 1 |
+| `distribution` | 0 | 2 | 2 |
 | `fragment.duration` | 0.001 | 600 | 300 |
 | `pointer.start` | 0 | 1 | 1 |
 | `volume` | −120 | 12 | 24 |
