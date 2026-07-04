@@ -293,39 +293,14 @@ function paramRow(def, control, getDur) {
 }
 
 
-/* Assegnazione fissa dei parametri alle tre colonne: gruppi logici
-   stabili, nessun reflow quando si attiva/disattiva. */
-const COLUMN_OF = {
-  "onset": 0, "duration": 0, "time_mode": 0,
-  "fragment.duration": 0, "fragment.duration_range": 0,
-  "fragment.rhythm.bpm": 0, "fragment.rhythm.pattern": 0,
-  "fragment.envelope": 1, "fragment.attack": 1, "fragment.release": 1,
-  "fill_factor": 1, "fill_factor_range": 1, "distribution": 1,
-  "pointer.start": 2, "pointer.start_range": 2, "pointer.overflow": 2,
-  "selection.strategy": 2, "volume": 2, "volume_range": 2,
-  "pan": 2, "pan_range": 2,
-};
-
-function fillColumns(grid, defs, rowFor) {
-  const cols = [0, 1, 2].map(() => {
-    const c = document.createElement("div");
-    grid.append(c);
-    return c;
-  });
-  defs.forEach((def, i) => {
-    const col = COLUMN_OF[def.path] ?? (i % 3);
-    cols[col].append(rowFor(def));
-  });
-}
-
 /* ---------- pannelli ---------- */
 function renderGlobals() {
   const box = document.getElementById("global-params");
   box.innerHTML = "";
-  for (const def of GLOBAL_DEFS)
+  for (const def of GLOBAL_DEFS) {
     if (!state.global[def.path]) state.global[def.path] = newControl(def);
-  fillColumns(box, GLOBAL_DEFS,
-              def => paramRow(def, state.global[def.path], () => 60));
+    box.append(paramRow(def, state.global[def.path], () => 60));
+  }
 }
 
 function renderLayers() {
@@ -387,12 +362,11 @@ function renderLayers() {
       return (d.enabled && !Array.isArray(d.value)) ? d.value : 20;
     };
     const grainMode = isRhythm() ? "rhythm" : "tendency";
-    const visibili = LAYER_DEFS.filter(def => {
+    for (const def of LAYER_DEFS) {
       if (!layer.params[def.path]) layer.params[def.path] = newControl(def);
-      return !def.mode || def.mode === grainMode;
-    });
-    fillColumns(grid, visibili,
-                def => paramRow(def, layer.params[def.path], getDur));
+      if (def.mode && def.mode !== grainMode) continue;
+      grid.append(paramRow(def, layer.params[def.path], getDur));
+    }
     panel.append(grid);
     // Sezione digger: esiste solo se il toggle "download (dig)" è attivo.
     if (document.getElementById("chk-dig").checked) {

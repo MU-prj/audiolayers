@@ -58,11 +58,8 @@ body.dark .panel { box-shadow: 2px 2px 3px rgba(0,0,0,.55),
 }
 .layer-head select { width: auto; }
 
-/* Tre colonne FISSE per gruppo logico (tempo/grano | forma/tessuto |
-   sorgente/uscita): attivare un parametro non sposta gli altri. */
-.params { display: grid; grid-template-columns: repeat(3, 1fr);
-          gap: 0 16px; align-items: start; }
-@media (max-width: 760px) { .params { grid-template-columns: 1fr; } }
+.params { display: grid; grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+          gap: 1px 16px; }
 .param { display: grid; grid-template-columns: 13px 10em 1fr 4.4em;
          gap: 5px; align-items: center; min-height: 22px; }
 .param.bare { grid-template-columns: 13px 1fr; min-height: 18px; }
