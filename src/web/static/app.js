@@ -294,8 +294,9 @@ function paramRow(def, control, getDur) {
 
 
 
-function setColumnFlow(grid, rows = 3) {
-  grid.style.gridTemplateRows = `repeat(${rows}, auto)`;
+function setColumnFlow(grid) {
+  const n = grid.children.length;
+  grid.style.gridTemplateRows = `repeat(${Math.max(1, Math.ceil(n / 3))}, auto)`;
 }
 
 /* ---------- pannelli ---------- */
@@ -306,7 +307,7 @@ function renderGlobals() {
     if (!state.global[def.path]) state.global[def.path] = newControl(def);
     box.append(paramRow(def, state.global[def.path], () => 60));
   }
-  setColumnFlow(box, 1);
+  setColumnFlow(box);
 }
 
 function renderLayers() {
