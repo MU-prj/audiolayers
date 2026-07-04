@@ -375,7 +375,6 @@ function renderLayers() {
       if (def.mode && def.mode !== grainMode) continue;
       grid.append(paramRow(def, layer.params[def.path], getDur));
     }
-    setColumnFlow(grid);
     panel.append(grid);
     // Sezione digger: esiste solo se il toggle "download (dig)" è attivo.
     if (document.getElementById("chk-dig").checked) {
