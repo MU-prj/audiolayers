@@ -59,17 +59,27 @@ body.dark .panel { box-shadow: 2px 2px 3px rgba(0,0,0,.55),
 .layer-head select { width: auto; }
 
 .params { display: grid; grid-auto-flow: column;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1px 16px; }
-@media (max-width: 760px) {
-  .params { grid-auto-flow: row; grid-template-columns: 1fr;
-            grid-template-rows: none !important; }
+          grid-template-rows: repeat(3, auto);
+          grid-auto-columns: minmax(0, 1fr);
+          gap: 4px 10px; }
+@media (max-width: 900px) {
+  .params { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: none !important; grid-auto-columns: unset; }
 }
-.param { display: grid; grid-template-columns: 13px 10em 1fr 4.4em;
-         gap: 5px; align-items: center; min-height: 22px; }
-.param.bare { grid-template-columns: 13px 1fr; min-height: 22px; }
+.param { display: grid;
+         grid-template-columns: 13px 1fr 3.6em;
+         grid-template-areas: "chk name name" "ctl ctl val";
+         gap: 1px 4px; align-items: center; min-height: 40px;
+         align-content: start; }
+.param > input[type=checkbox] { grid-area: chk; }
+.param .name { grid-area: name; }
+.param .ctl { grid-area: ctl; }
+.param .value { grid-area: val; }
+.param.bare { grid-template-columns: 13px 1fr;
+              grid-template-areas: "chk name"; min-height: 40px; }
 .param.bare .name { color: var(--mut); }
-.param.wide { grid-template-columns: 13px 10em 1fr; }
+.param.wide { grid-template-columns: 13px 1fr;
+              grid-template-areas: "chk name" "ctl ctl"; }
 .param.wide .value { display: none; }
 .param .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
                cursor: help; }
