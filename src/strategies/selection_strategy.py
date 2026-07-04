@@ -71,6 +71,11 @@ _STRATEGIES = {
 }
 
 
+def available_selection_strategies() -> list[str]:
+    """Nomi delle strategie di selezione (fonte per catalogo e GUI)."""
+    return sorted(_STRATEGIES)
+
+
 def build_selection_strategy(selection_block: dict, *, pool_size: int,
                              layer_id: str, seed) -> SelectionStrategy:
     """Factory dal blocco YAML `selection` (default: sequential)."""

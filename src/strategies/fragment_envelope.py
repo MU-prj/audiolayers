@@ -64,6 +64,11 @@ _STRATEGIES = {
 }
 
 
+def available_envelopes() -> list[str]:
+    """Nomi degli inviluppi di frammento (fonte per catalogo e GUI)."""
+    return sorted(_STRATEGIES)
+
+
 def build_fragment_envelope(fragment_block: dict) -> FragmentEnvelopeStrategy:
     """Factory dal blocco YAML `fragment` (default: raised_cosine)."""
     name = fragment_block.get("envelope", "raised_cosine")

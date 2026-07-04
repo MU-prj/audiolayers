@@ -112,6 +112,12 @@ def create_app(*, output_dir: Path | None = None,
     def read_log():
         return jsonify(log.since(request.args.get("since", 0, type=int)))
 
+    @app.get("/api/params")
+    def params():
+        """Catalogo dei parametri: la GUI si genera da qui (fonte unica)."""
+        from src.parameters.catalog import catalog
+        return jsonify(catalog())
+
     @app.get("/api/jobs/<job_id>")
     def job_status(job_id):
         return jsonify(jobs.status(job_id))

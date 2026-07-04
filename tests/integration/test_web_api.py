@@ -119,6 +119,18 @@ class TestWebApi:
         assert params["pointer.start_range"]["value"] == 0.5
         assert params["provision.search.license"]["value"] == "cc"
 
+    def test_api_params_espone_il_catalogo(self, tmp_path):
+        """La GUI si genera dal catalogo del motore: bounds veri, enum
+        veri, niente doppioni JavaScript."""
+        app = create_app(output_dir=tmp_path / "out")
+        cat = app.test_client().get("/api/params").get_json()
+        assert set(cat) == {"global", "layer", "provision"}
+        fill = next(e for e in cat["layer"] if e["path"] == "fill_factor")
+        assert fill["max"] == 50.0          # bound VERO del motore
+        assert fill["ui"]["max"] == 5       # range comodo per lo slider
+        sel = next(e for e in cat["layer"] if e["path"] == "selection.strategy")
+        assert "rotation" in sel["options"]
+
     def test_root_serve_la_pagina(self, tmp_path):
         app = create_app(output_dir=tmp_path / "out")
         response = app.test_client().get("/")

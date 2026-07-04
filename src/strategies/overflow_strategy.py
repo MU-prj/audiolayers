@@ -58,6 +58,11 @@ _STRATEGIES = {
 }
 
 
+def available_overflow_strategies() -> list[str]:
+    """Nomi delle strategie di overflow (fonte per catalogo e GUI)."""
+    return sorted(_STRATEGIES)
+
+
 def build_overflow_strategy(pointer_block: dict) -> OverflowStrategy:
     """Factory dal blocco YAML `pointer` (default: clamp_back)."""
     name = pointer_block.get("overflow", "clamp_back")
