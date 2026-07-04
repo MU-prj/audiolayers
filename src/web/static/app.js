@@ -514,6 +514,7 @@ document.getElementById("env-divider").addEventListener("pointerdown", ev => {
 /* ---------- pannello info ---------- */
 function showInfo(def) {
   const box = document.getElementById("infobox");
+  box.querySelector(".chiudi").onclick = () => { box.hidden = true; };
   box.querySelector("h3").textContent = def.label;
   box.querySelector("p").textContent = def.info || "nessuna descrizione";
   box.hidden = false;
