@@ -1,10 +1,4 @@
-numpy>=1.26
-soundfile>=0.12
-soxr>=0.5
-PyYAML>=6.0
-scipy>=1.11
-flask>=3.0
-archivedigger @ git+https://github.com/MU-prj/archivedigger@main
+# Il motore (e le sue dipendenze runtime) dal pyproject; qui solo il dev.
+-e .
 
-# dev
 pytest>=8.0

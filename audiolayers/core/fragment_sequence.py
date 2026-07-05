@@ -14,8 +14,8 @@ campionati al tempo di posa di ciascun frammento.
 
 from dataclasses import dataclass
 
-from src.parameters.parameter import Parameter
-from src.strategies.duration_strategy import DurationStrategy
+from audiolayers.parameters.parameter import Parameter
+from audiolayers.strategies.duration_strategy import DurationStrategy
 
 
 @dataclass(frozen=True)

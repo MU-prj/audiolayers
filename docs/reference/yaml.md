@@ -4,17 +4,17 @@ type: reference
 status: stable
 tags: [yaml, syntax, parameters, envelopes, tendency-masks]
 sources:
-  - src/engine/render.py
-  - src/parameters/
-  - src/envelopes/
-  - src/strategies/
-  - src/provisioning/
-  - src/shared/seeding.py
+  - audiolayers/engine/render.py
+  - audiolayers/parameters/
+  - audiolayers/envelopes/
+  - audiolayers/strategies/
+  - audiolayers/provisioning/
+  - audiolayers/shared/seeding.py
 ---
 
 # YAML Reference — audiolayers
 
-Reference completa del formato di partitura consumato da `python -m src.main`.
+Reference completa del formato di partitura consumato da `python -m audiolayers.main`.
 Per la riga di comando vedi [cli.md](cli.md); per le decisioni di design il
 [plan di bootstrap](../plans/done/2026-07-02-001-project-bootstrap-plan.md).
 

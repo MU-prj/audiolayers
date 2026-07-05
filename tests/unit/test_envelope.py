@@ -6,7 +6,7 @@ può essere una curva nel tempo. Interpolazione lineare (v1).
 
 import pytest
 
-from src.envelopes.envelope import Envelope
+from audiolayers.envelopes.envelope import Envelope
 
 
 class TestInterpolazioneLineare:
@@ -48,7 +48,7 @@ class TestNormalizzazioneInput:
         assert env.evaluate(100.0) == 7.5
 
     def test_zero_breakpoint_solleva_errore_chiaro(self):
-        from src.shared.exceptions import InvalidFieldValueError
+        from audiolayers.shared.exceptions import InvalidFieldValueError
 
         with pytest.raises(InvalidFieldValueError, match="breakpoint"):
             Envelope([])

@@ -95,7 +95,7 @@ layers:
 e lancia:
 
 ```bash
-python -m src.main primo.yaml -o primo.wav
+python -m audiolayers.main primo.yaml -o primo.wav
 ```
 
 Otterrai 10 secondi di audio: frammenti da mezzo secondo, presi dai tuoi
@@ -111,7 +111,7 @@ Il ciclo tipico di una sessione:
 ```
 scrivi/modifichi la partitura
         ↓
-python -m src.main brano.yaml -o brano.wav
+python -m audiolayers.main brano.yaml -o brano.wav
         ↓
 leggi l'output diagnostico:
   · "seed di sessione (generato): N ..."  ← annotalo se il risultato ti piace!
@@ -500,7 +500,7 @@ ferma con errore chiaro) sono in [reference/yaml.md](reference/yaml.md#tabella-b
 ## 6. La riga di comando
 
 ```bash
-python -m src.main PARTITURA.yaml -o USCITA [opzioni]
+python -m audiolayers.main PARTITURA.yaml -o USCITA [opzioni]
 ```
 
 | Opzione | Effetto |
@@ -546,7 +546,7 @@ sbagliato, e dicono sempre cosa e dove:
 
 ```
 audiolayers/
-├── src/
+├── audiolayers/
 │   ├── main.py                  # la CLI
 │   ├── engine/render.py         # la pipeline: YAML → layers → mix → file
 │   ├── core/fragment_sequence.py# onset+durate, criterio di stop

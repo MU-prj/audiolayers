@@ -1,12 +1,12 @@
 """CLI di audiolayers: renderizza una partitura YAML in un file audio.
 
-Uso: python -m src.main SCORE.yaml -o OUT.wav
+Uso: python -m audiolayers.main SCORE.yaml -o OUT.wav
 """
 
 import argparse
 from pathlib import Path
 
-from src.engine.render import render_score
+from audiolayers.engine.render import render_score
 
 
 def main(argv=None, *, client=None) -> int:
@@ -33,7 +33,7 @@ def main(argv=None, *, client=None) -> int:
     args = parser.parse_args(argv)
 
     if args.dig:
-        from src.provisioning.pool_source import provision_score
+        from audiolayers.provisioning.pool_source import provision_score
         provision_score(args.score, client=client)
 
     render_score(args.score, args.output, output_format=args.format,

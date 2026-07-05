@@ -28,14 +28,14 @@ Mappa concettuale: `stream → layer` · `grain → fragment` ·
 
 | Ingrediente PGE | File PGE | Dove vive in audiolayers |
 |---|---|---|
-| Sistema parametri a 3 livelli (bounds / schema / parser) | `parameters/parameter_definitions.py`, `parameter_schema.py`, `parser.py` | `src/parameters/` (D18) |
-| Default automatici per chiavi YAML assenti (`ParameterSpec.default` + `_get_nested`) | `parameter_factory.py` | `src/parameters/parser.py` |
-| Tendency mask `base ± range`, convenzione suffisso `_range` | `parameter.py` | `src/parameters/parameter.py` (D5) |
-| `fill_factor` (= nostro F) e `distribution` (= nostro α, blend sync↔async Truax) | `controllers/density_controller.py` | `src/core/fragment_sequence.py` (D2, D3) |
-| Envelope breakpoints + `time_mode absolute/normalized` | `envelopes/envelope.py` | `src/envelopes/` (M2) |
-| Seeding namespaced sha256 (modello delle voci PGE, esteso a tutto) | `shared/seeding.py` | `src/shared/seeding.py` (D14) |
-| `solo`/`mute` (i solo vincono, poi i mute) | `engine/generator.py` `_filter_solo_mute` | `src/engine/render.py` (D15) |
-| Bounds con validazione severa al parse, errori parlanti | `parser.py` `_validate_and_clip` | `src/parameters/parser.py` |
+| Sistema parametri a 3 livelli (bounds / schema / parser) | `parameters/parameter_definitions.py`, `parameter_schema.py`, `parser.py` | `audiolayers/parameters/` (D18) |
+| Default automatici per chiavi YAML assenti (`ParameterSpec.default` + `_get_nested`) | `parameter_factory.py` | `audiolayers/parameters/parser.py` |
+| Tendency mask `base ± range`, convenzione suffisso `_range` | `parameter.py` | `audiolayers/parameters/parameter.py` (D5) |
+| `fill_factor` (= nostro F) e `distribution` (= nostro α, blend sync↔async Truax) | `controllers/density_controller.py` | `audiolayers/core/fragment_sequence.py` (D2, D3) |
+| Envelope breakpoints + `time_mode absolute/normalized` | `envelopes/envelope.py` | `audiolayers/envelopes/` (M2) |
+| Seeding namespaced sha256 (modello delle voci PGE, esteso a tutto) | `shared/seeding.py` | `audiolayers/shared/seeding.py` (D14) |
+| `solo`/`mute` (i solo vincono, poi i mute) | `engine/generator.py` `_filter_solo_mute` | `audiolayers/engine/render.py` (D15) |
+| Bounds con validazione severa al parse, errori parlanti | `parser.py` `_validate_and_clip` | `audiolayers/parameters/parser.py` |
 | Convenzione esclusività **a errore esplicito** (non priorità silenziosa) | blocco pitch post-refactor | `duration` vs `rhythm` in `duration_strategy.py` |
 | Docs Diátaxis, `plans/done/`, frontmatter con `sources` | `docs/` | `docs/` |
 
@@ -346,7 +346,7 @@ PGE#154. Miglioria facile alla trappola: includere nel fingerprint
    issue #154, sezione 2). Lezione: quando una Strategy sostituisce metodi
    interni, cancellarli nello stesso commit.
 3. **Doppio stile di import** (`from parameters...` con `src` nel path):
-   fonte di doppi-import; noi usiamo un solo stile `from src....`.
+   fonte di doppi-import; noi usiamo un solo stile `from audiolayers....`.
 4. **Uniform con semantica spread-totale** ma documentata come ±range:
    ambiguità di contratto; da noi `range` è la semiampiezza, punto.
 

@@ -5,8 +5,8 @@ lista di breakpoint `[[t, v], …]`, o dict `{type, points, time_mode}`.
 Il resto del sistema vede solo float o Envelope.
 """
 
-from src.envelopes.envelope import Envelope
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.envelopes.envelope import Envelope
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 SUPPORTED_INTERPOLATIONS = ("linear",)
 TIME_MODES = ("absolute", "normalized")

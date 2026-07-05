@@ -7,10 +7,10 @@ banda, con RNG namespaced iniettato (D14); i bounds fanno da guardia.
 import numpy as np
 import pytest
 
-from src.parameters.parameter import Parameter, resolve
-from src.parameters.parameter_definitions import ParameterBounds
-from src.shared.seeding import rng_for
-from src.envelopes.envelope import Envelope
+from audiolayers.parameters.parameter import Parameter, resolve
+from audiolayers.parameters.parameter_definitions import ParameterBounds
+from audiolayers.shared.seeding import rng_for
+from audiolayers.envelopes.envelope import Envelope
 
 VOLUME_BOUNDS = ParameterBounds(min_val=-120.0, max_val=12.0,
                                 min_range=0.0, max_range=24.0)

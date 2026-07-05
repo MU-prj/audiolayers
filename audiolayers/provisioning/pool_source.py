@@ -11,8 +11,8 @@ from pathlib import Path
 from archivedigger.api import dig
 from archivedigger.config import Config
 
-from src.audio.pool import count_suitable_files
-from src.provisioning.analyzer import (PoolRequirements,
+from audiolayers.audio.pool import count_suitable_files
+from audiolayers.provisioning.analyzer import (PoolRequirements,
                                        analyze_layer, apply_policy)
 
 #: Default di ricerca quando la partitura non dice nulla (D-P4).
@@ -111,7 +111,7 @@ def provision_score(score_path, client=None) -> None:
     """
     import yaml
 
-    from src.core.layer_plan import active_layers
+    from audiolayers.core.layer_plan import active_layers
 
     data = yaml.safe_load(Path(score_path).read_text(encoding="utf-8"))
     seed = data.get("seed") if data.get("seed") is not None else 0

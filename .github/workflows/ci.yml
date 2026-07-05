@@ -51,7 +51,7 @@ jobs:
       - name: Suite completa (unit + integration + golden + e2e) con coverage
         run: |
           python -m pytest \
-            --cov=src --cov-branch \
+            --cov=audiolayers --cov-branch \
             --cov-report=term-missing --cov-report=xml
 
       - name: Archivia il report di coverage

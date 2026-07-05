@@ -7,7 +7,7 @@ coincidono con quello che il render produrrà.
 
 from dataclasses import dataclass
 
-from src.core.layer_plan import build_layer_plan
+from audiolayers.core.layer_plan import build_layer_plan
 
 #: Tetto (secondi) alla durata dei file da scaricare (D-P3, per ora fisso).
 MAX_FILE_DURATION = 10.0
@@ -35,7 +35,7 @@ def apply_policy(req: PoolRequirements, provision: dict) -> PoolRequirements:
     """
     import math
 
-    from src.shared.exceptions import InvalidFieldValueError
+    from audiolayers.shared.exceptions import InvalidFieldValueError
 
     mode = provision.get("mode", "per-fragment")
     files_needed = req.files_needed

@@ -8,8 +8,8 @@ emergenti. `rectangle` = nessun inviluppo (Strategy esplicita).
 import numpy as np
 import pytest
 
-from src.shared.exceptions import InvalidFieldValueError
-from src.strategies.fragment_envelope import (RaisedCosineEnvelope,
+from audiolayers.shared.exceptions import InvalidFieldValueError
+from audiolayers.strategies.fragment_envelope import (RaisedCosineEnvelope,
                                               RectangleEnvelope,
                                               build_fragment_envelope)
 

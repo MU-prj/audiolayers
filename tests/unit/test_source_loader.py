@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from src.audio.source_loader import load_mono
+from audiolayers.audio.source_loader import load_mono
 
 SR = 48000
 

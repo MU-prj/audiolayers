@@ -8,9 +8,9 @@ Forme accettate (D5, convenzioni PGE):
 
 import pytest
 
-from src.envelopes.envelope import Envelope
-from src.envelopes.envelope_builder import build_envelope, is_envelope_like
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.envelopes.envelope import Envelope
+from audiolayers.envelopes.envelope_builder import build_envelope, is_envelope_like
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 
 class TestFormeAccettate:

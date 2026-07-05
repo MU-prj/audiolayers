@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from src.engine.render import render_score  # noqa: E402
+from audiolayers.engine.render import render_score  # noqa: E402
 from tests.golden.golden_common import (REFERENCES_DIR, build_pool,  # noqa: E402
                                         materialize_score, score_names)
 

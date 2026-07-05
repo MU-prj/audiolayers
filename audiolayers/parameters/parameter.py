@@ -5,8 +5,8 @@ con RNG namespaced iniettato (D14), poi clamp di sicurezza sui bounds.
 `range = 0` (o assente) → valore deterministico.
 """
 
-from src.envelopes.envelope import Envelope
-from src.parameters.parameter_definitions import ParameterBounds
+from audiolayers.envelopes.envelope import Envelope
+from audiolayers.parameters.parameter_definitions import ParameterBounds
 
 
 def resolve(value, time: float) -> float:

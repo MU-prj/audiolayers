@@ -9,9 +9,9 @@ Tutte con RNG namespaced (D14) dove serve.
 
 import pytest
 
-from src.shared.exceptions import InvalidFieldValueError
-from src.shared.seeding import rng_for
-from src.strategies.selection_strategy import (RandomSelection,
+from audiolayers.shared.exceptions import InvalidFieldValueError
+from audiolayers.shared.seeding import rng_for
+from audiolayers.strategies.selection_strategy import (RandomSelection,
                                                RotationSelection,
                                                SequentialSelection,
                                                build_selection_strategy)

@@ -7,7 +7,7 @@ curve nel tempo). Interpolazione lineare (v1).
 
 import numpy as np
 
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 
 class Envelope:

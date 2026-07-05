@@ -8,12 +8,12 @@ e non può più divergere.
 
 import pytest
 
-from src.parameters.catalog import catalog, catalog_entry
-from src.parameters.parameter_definitions import get_parameter_definition
-from src.strategies.fragment_envelope import (DEFAULT_ATTACK,
+from audiolayers.parameters.catalog import catalog, catalog_entry
+from audiolayers.parameters.parameter_definitions import get_parameter_definition
+from audiolayers.strategies.fragment_envelope import (DEFAULT_ATTACK,
                                               available_envelopes)
-from src.strategies.overflow_strategy import available_overflow_strategies
-from src.strategies.selection_strategy import available_selection_strategies
+from audiolayers.strategies.overflow_strategy import available_overflow_strategies
+from audiolayers.strategies.selection_strategy import available_selection_strategies
 
 
 class TestErrori:

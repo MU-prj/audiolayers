@@ -45,7 +45,7 @@ layers:
 
 def _run_cli(score: Path, output: Path) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, "-m", "src.main", str(score), "-o", str(output)],
+        [sys.executable, "-m", "audiolayers.main", str(score), "-o", str(output)],
         capture_output=True,
         text=True,
         cwd=Path(__file__).resolve().parents[2],

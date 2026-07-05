@@ -2,9 +2,9 @@
 # con durata che cresce linearmente da 1 ms a 1 s lungo i 60 secondi.
 #
 #   render puro (pool già popolato):
-#     python -m src.main scores/stream-crescente.yaml -o out/stream.wav
+#     python -m audiolayers.main scores/stream-crescente.yaml -o out/stream.wav
 #   con provisioning automatico da Internet Archive:
-#     python -m src.main scores/stream-crescente.yaml -o out/stream.wav --dig
+#     python -m audiolayers.main scores/stream-crescente.yaml -o out/stream.wav --dig
 sample_rate: 48000
 seed: 20260703
 master_volume: -4.0

@@ -7,7 +7,7 @@ cache e refactor non possono alterare i valori delle altre componenti.
 
 import numpy as np
 
-from src.shared.seeding import rng_for
+from audiolayers.shared.seeding import rng_for
 
 
 def test_stesso_nome_stessa_sequenza():

@@ -10,10 +10,10 @@ Convenzione ritmica: i valori del pattern sono frazioni di semibreve
 
 from abc import ABC, abstractmethod
 
-from src.envelopes.envelope_builder import build_envelope
-from src.parameters.parameter import Parameter, resolve
-from src.parameters.parser import create_parameter
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.envelopes.envelope_builder import build_envelope
+from audiolayers.parameters.parameter import Parameter, resolve
+from audiolayers.parameters.parser import create_parameter
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 WHOLE_NOTE_BEATS = 4.0  # semibreve = 4 movimenti
 

@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 DEFAULT_ATTACK = 0.008   # s
 DEFAULT_RELEASE = 0.010  # s
@@ -79,7 +79,7 @@ def build_fragment_envelope(fragment_block: dict) -> FragmentEnvelopeStrategy:
         )
     # Bounds dal registry, come ogni altro numerico: la "sicurezza"
     # dichiarata deve essere applicata davvero (deepening D1b).
-    from src.parameters.parser import validate_parameter
+    from audiolayers.parameters.parser import validate_parameter
 
     attack = float(fragment_block.get("attack", DEFAULT_ATTACK))
     release = float(fragment_block.get("release", DEFAULT_RELEASE))

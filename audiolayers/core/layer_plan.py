@@ -8,11 +8,11 @@ i requisiti di pool. Un solo assemblaggio = niente divergenze silenziose.
 
 from dataclasses import dataclass
 
-from src.core.fragment_sequence import FragmentSpec, build_fragment_sequence
-from src.parameters.parameter import Parameter
-from src.parameters.parser import create_layer_parameters
-from src.shared.seeding import rng_for
-from src.strategies.duration_strategy import build_duration_strategies
+from audiolayers.core.fragment_sequence import FragmentSpec, build_fragment_sequence
+from audiolayers.parameters.parameter import Parameter
+from audiolayers.parameters.parser import create_layer_parameters
+from audiolayers.shared.seeding import rng_for
+from audiolayers.strategies.duration_strategy import build_duration_strategies
 
 
 def active_layers(layers: list) -> list:

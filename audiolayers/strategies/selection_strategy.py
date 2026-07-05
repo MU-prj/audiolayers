@@ -13,7 +13,7 @@ Le strategie stocastiche ricevono l'RNG namespaced del layer (D14).
 
 from abc import ABC, abstractmethod
 
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 
 class SelectionStrategy(ABC):
@@ -79,7 +79,7 @@ def available_selection_strategies() -> list[str]:
 def build_selection_strategy(selection_block: dict, *, pool_size: int,
                              layer_id: str, seed) -> SelectionStrategy:
     """Factory dal blocco YAML `selection` (default: sequential)."""
-    from src.shared.seeding import rng_for
+    from audiolayers.shared.seeding import rng_for
 
     name = selection_block.get("strategy", "sequential")
     if name not in _STRATEGIES:

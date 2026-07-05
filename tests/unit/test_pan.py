@@ -7,7 +7,7 @@ mid = s·cos(rad), side = s·sin(rad), L = (mid+side)/√2, R = (mid−side)/√
 import numpy as np
 import pytest
 
-from src.audio.pan import pan_stereo
+from audiolayers.audio.pan import pan_stereo
 
 SIGNAL = np.array([1.0, -0.5, 0.25])
 

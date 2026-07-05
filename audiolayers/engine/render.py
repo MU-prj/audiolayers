@@ -13,13 +13,13 @@ import numpy as np
 import soundfile as sf
 import yaml
 
-from src.audio.pan import pan_stereo
-from src.audio.pool import scan_pool
-from src.audio.source_loader import load_mono
-from src.core.layer_plan import active_layers, build_layer_plan
-from src.strategies.fragment_envelope import build_fragment_envelope
-from src.strategies.overflow_strategy import build_overflow_strategy
-from src.strategies.selection_strategy import build_selection_strategy
+from audiolayers.audio.pan import pan_stereo
+from audiolayers.audio.pool import scan_pool
+from audiolayers.audio.source_loader import load_mono
+from audiolayers.core.layer_plan import active_layers, build_layer_plan
+from audiolayers.strategies.fragment_envelope import build_fragment_envelope
+from audiolayers.strategies.overflow_strategy import build_overflow_strategy
+from audiolayers.strategies.selection_strategy import build_selection_strategy
 
 DEFAULT_SAMPLE_RATE = 48000
 
@@ -64,8 +64,8 @@ def _build_master(master_volume):
     """Costruisce e VALIDA il master contro i bounds del registry:
     la partitura fuori range non parte proprio (niente sorprese a fine
     render)."""
-    from src.envelopes.envelope_builder import build_envelope
-    from src.parameters.parser import validate_parameter
+    from audiolayers.envelopes.envelope_builder import build_envelope
+    from audiolayers.parameters.parser import validate_parameter
 
     master = build_envelope(master_volume)
     validate_parameter(master, "master_volume")
@@ -75,7 +75,7 @@ def _build_master(master_volume):
 def _apply_master(mix: np.ndarray, master,
                   sample_rate: int) -> np.ndarray:
     """master in dB (float o Envelope), curva per-campione."""
-    from src.envelopes.envelope import Envelope
+    from audiolayers.envelopes.envelope import Envelope
 
     if isinstance(master, Envelope):
         times = np.arange(len(mix)) / sample_rate

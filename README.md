@@ -38,7 +38,7 @@ layers:
 ```
 
 ```bash
-python -m src.main brano.yaml -o brano.wav
+python -m audiolayers.main brano.yaml -o brano.wav
 ```
 
 **Manuale completo**: [docs/manuale.md](docs/manuale.md) — con la guida
@@ -50,10 +50,15 @@ passo-passo "Come scrivere uno YAML". Reference:
 
 Motore v1 completo (M0–M10): multi-layer, tendency masks su tutti i
 parametri, strategie di durata/selezione/overflow/inviluppo, mix con
-master envelope e report del picco. Suite: 208 test (unit, integration,
+master envelope e report del picco. Suite: 185 test (unit, integration,
 golden, e2e), motore di sintesi al 100% di copertura riga+ramo, eseguiti in
 CI a ogni push/PR. Le decisioni di design (D1–D20) sono nel
 [plan di bootstrap](docs/plans/done/2026-07-02-001-project-bootstrap-plan.md).
+
+Questo repo contiene il **solo motore**, installabile come pacchetto
+(`pip install git+https://github.com/MU-prj/audiolayers@main`). La GUI
+web vive in [MU-prj/audiolayers_gui](https://github.com/MU-prj/audiolayers_gui)
+e consuma il motore come libreria.
 
 ## Setup
 

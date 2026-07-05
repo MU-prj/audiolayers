@@ -8,8 +8,8 @@
 
 import pytest
 
-from src.parameters.parser import create_layer_parameters
-from src.shared.exceptions import ParameterBoundError
+from audiolayers.parameters.parser import create_layer_parameters
+from audiolayers.shared.exceptions import ParameterBoundError
 
 
 def make_params(layer_data: dict, seed=42, duration=30.0):

@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from src.audio.pool import AUDIO_EXTENSIONS, count_suitable_files, scan_pool
+from audiolayers.audio.pool import AUDIO_EXTENSIONS, count_suitable_files, scan_pool
 
 
 def write_wav(path, seconds, sample_rate=48000):

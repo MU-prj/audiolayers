@@ -8,9 +8,9 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from src.engine.render import render_score
-from src.shared.exceptions import ParameterBoundError
-from src.strategies.fragment_envelope import build_fragment_envelope
+from audiolayers.engine.render import render_score
+from audiolayers.shared.exceptions import ParameterBoundError
+from audiolayers.strategies.fragment_envelope import build_fragment_envelope
 
 
 def write_score(tmp_path, master):

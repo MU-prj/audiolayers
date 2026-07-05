@@ -7,13 +7,13 @@
 
 import pytest
 
-from src.strategies.duration_strategy import (RhythmicDurationStrategy,
+from audiolayers.strategies.duration_strategy import (RhythmicDurationStrategy,
                                               TendencyDurationStrategy,
                                               build_duration_strategies)
-from src.parameters.parameter import Parameter
-from src.parameters.parameter_definitions import get_parameter_definition
-from src.shared.exceptions import InvalidFieldValueError
-from src.shared.seeding import rng_for
+from audiolayers.parameters.parameter import Parameter
+from audiolayers.parameters.parameter_definitions import get_parameter_definition
+from audiolayers.shared.exceptions import InvalidFieldValueError
+from audiolayers.shared.seeding import rng_for
 
 
 class TestRhythmic:

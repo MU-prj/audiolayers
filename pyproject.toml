@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "audiolayers"
+version = "1.0.0"
+description = "Ambiente compositivo dichiarativo per Computer Music: partiture YAML, tendency masks di Truax, mix multi-layer."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "soundfile>=0.12",
+    "soxr>=0.5",
+    "PyYAML>=6.0",
+    "scipy>=1.11",
+    "archivedigger @ git+https://github.com/MU-prj/archivedigger@main",
+]
+
+[project.scripts]
+audiolayers = "audiolayers.main:main"
+
+[tool.setuptools.packages.find]
+include = ["audiolayers*"]

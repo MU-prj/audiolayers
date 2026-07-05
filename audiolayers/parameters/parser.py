@@ -6,15 +6,15 @@ un valore fuori bounds ferma il render con un errore parlante, non
 suona "quasi giusto" in silenzio.
 """
 
-from src.envelopes.envelope import Envelope
-from src.envelopes.envelope_builder import build_envelope
-from src.parameters.parameter import Parameter
-from src.parameters.parameter_definitions import (ParameterBounds,
+from audiolayers.envelopes.envelope import Envelope
+from audiolayers.envelopes.envelope_builder import build_envelope
+from audiolayers.parameters.parameter import Parameter
+from audiolayers.parameters.parameter_definitions import (ParameterBounds,
                                                   get_parameter_definition)
-from src.parameters.parameter_schema import (LAYER_PARAMETER_SCHEMA,
+from audiolayers.parameters.parameter_schema import (LAYER_PARAMETER_SCHEMA,
                                              ParameterSpec)
-from src.shared.exceptions import ParameterBoundError
-from src.shared.seeding import rng_for
+from audiolayers.shared.exceptions import ParameterBoundError
+from audiolayers.shared.seeding import rng_for
 
 
 def create_parameter(name: str, raw_base, raw_range=None, *, layer_id: str,

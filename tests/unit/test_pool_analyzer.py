@@ -7,9 +7,9 @@ quanti file servono e quanto devono durare.
 
 import pytest
 
-from src.provisioning.analyzer import (PoolRequirements, analyze_layer,
+from audiolayers.provisioning.analyzer import (PoolRequirements, analyze_layer,
                                        apply_policy)
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 
 class TestApplyPolicy:

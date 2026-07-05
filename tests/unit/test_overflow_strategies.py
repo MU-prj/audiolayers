@@ -9,8 +9,8 @@ Quando `punto_di_lettura + durata` supera la fine del file:
 import numpy as np
 import pytest
 
-from src.shared.exceptions import InvalidFieldValueError
-from src.strategies.overflow_strategy import (ClampBackOverflow,
+from audiolayers.shared.exceptions import InvalidFieldValueError
+from audiolayers.strategies.overflow_strategy import (ClampBackOverflow,
                                               LoopOverflow, ZeroPadOverflow,
                                               build_overflow_strategy)
 

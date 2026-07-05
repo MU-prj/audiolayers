@@ -6,6 +6,25 @@ segue il versionamento semantico.
 
 ## [Unreleased]
 
+### Changed
+
+- Il package `src` si chiama ora `audiolayers` e il motore è un pacchetto
+  Python installabile (`pyproject.toml`, entry point console
+  `audiolayers`): `pip install git+https://github.com/MU-prj/audiolayers@main`.
+  La CLI diventa `python -m audiolayers.main` (o `audiolayers`);
+  `requirements.txt` resta per il solo sviluppo (`-e .` + pytest).
+  Piano e decisioni (D-S1..D-S7):
+  `docs/plans/done/2026-07-05-003-engine-gui-split.md`.
+
+### Removed
+
+- La GUI web (`src/web/`, `make gui`, dipendenza flask) trasloca nel
+  repository dedicato
+  [MU-prj/audiolayers_gui](https://github.com/MU-prj/audiolayers_gui),
+  che consuma il motore come pacchetto installato. I punti di contatto
+  restano tre funzioni di libreria: `render_score`, `provision_score`,
+  `catalog`.
+
 ### Added
 
 - CI GitHub Actions (`.github/workflows/ci.yml`): l'intera suite

@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from src.engine.render import render_score
+from audiolayers.engine.render import render_score
 from tests.golden.golden_common import (REFERENCES_DIR, build_pool,
                                         materialize_score, score_names)
 

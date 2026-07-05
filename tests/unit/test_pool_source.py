@@ -9,8 +9,8 @@ import numpy as np
 import soundfile as sf
 from archivedigger.models import IAFile, IAItem
 
-from src.audio.pool import count_suitable_files
-from src.provisioning.pool_source import ArchiveDiggerSource
+from audiolayers.audio.pool import count_suitable_files
+from audiolayers.provisioning.pool_source import ArchiveDiggerSource
 
 
 def write_wav(path, seconds, sample_rate=48000):
@@ -86,7 +86,7 @@ class TestDiggerGlobale:
         per pool, fabbisogni sommati (2 layer x 4 frammenti = 8 file)."""
         import yaml as _yaml
 
-        from src.provisioning.pool_source import provision_score
+        from audiolayers.provisioning.pool_source import provision_score
         pool = tmp_path / "pool"
         score = {
             "seed": 1,
@@ -106,7 +106,7 @@ class TestDiggerGlobale:
         globale vince sul per-layer."""
         import yaml as _yaml
 
-        from src.provisioning.pool_source import provision_score
+        from audiolayers.provisioning.pool_source import provision_score
         pool = tmp_path / "pool"
         score = {
             "seed": 1,

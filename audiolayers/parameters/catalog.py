@@ -11,12 +11,12 @@ Python e JavaScript non è più possibile.
 il campo numerico accetta comunque tutto ciò che i bounds permettono.
 """
 
-from src.parameters.parameter_definitions import get_parameter_definition
-from src.strategies.fragment_envelope import (DEFAULT_ATTACK,
+from audiolayers.parameters.parameter_definitions import get_parameter_definition
+from audiolayers.strategies.fragment_envelope import (DEFAULT_ATTACK,
                                               DEFAULT_RELEASE,
                                               available_envelopes)
-from src.strategies.overflow_strategy import available_overflow_strategies
-from src.strategies.selection_strategy import available_selection_strategies
+from audiolayers.strategies.overflow_strategy import available_overflow_strategies
+from audiolayers.strategies.selection_strategy import available_selection_strategies
 
 
 def _num(path, label, bounds_name, default, *, env=True, step=0.01,

@@ -4,15 +4,15 @@ type: reference
 status: stable
 tags: [cli]
 sources:
-  - src/main.py
-  - src/engine/render.py
-  - src/provisioning/pool_source.py
+  - audiolayers/main.py
+  - audiolayers/engine/render.py
+  - audiolayers/provisioning/pool_source.py
 ---
 
 # CLI Reference — audiolayers
 
 ```
-python -m src.main SCORE.yaml -o OUT [opzioni]
+python -m audiolayers.main SCORE.yaml -o OUT [opzioni]
 ```
 
 | Opzione | Default | Significato |
@@ -39,16 +39,16 @@ python -m src.main SCORE.yaml -o OUT [opzioni]
 
 ```bash
 # render standard (WAV float32 48 kHz)
-python -m src.main brano.yaml -o brano.wav
+python -m audiolayers.main brano.yaml -o brano.wav
 
 # FLAC per la condivisione, normalizzato
-python -m src.main brano.yaml -o brano.flac --normalize
+python -m audiolayers.main brano.yaml -o brano.flac --normalize
 
 # WAV PCM 24 bit con seed forzato per un render riproducibile
-python -m src.main brano.yaml -o brano.wav --bit-depth 24
+python -m audiolayers.main brano.yaml -o brano.wav --bit-depth 24
 
 # pipeline completa: analizza la partitura, scarica il pool, renderizza
-python -m src.main scores/stream-crescente.yaml -o out/stream.wav --dig
+python -m audiolayers.main scores/stream-crescente.yaml -o out/stream.wav --dig
 ```
 
 ## `--dig`: provisioning automatico del pool
@@ -71,11 +71,8 @@ Via Makefile: `make render SCORE=brano.yaml`.
 
 ## GUI web
 
-```
-make gui            # oppure: python -m src.web [--port 8000]
-```
-
-Apre su `http://localhost:8000`: controlli on/off per ogni parametro
-(spento = default del motore), editor breakpoint per gli envelope,
-toggle `download (dig)`, render asincrono con player e download del wav,
-export/import YAML compatibile con la CLI.
+La GUI web vive in un repository dedicato:
+[MU-prj/audiolayers_gui](https://github.com/MU-prj/audiolayers_gui).
+Consuma il motore come pacchetto installato (`pip install
+git+https://github.com/MU-prj/audiolayers@main`) e si genera dal
+catalogo dei parametri (`audiolayers.parameters.catalog`).

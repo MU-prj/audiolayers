@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from src.engine.render import render_score
+from audiolayers.engine.render import render_score
 
 SR = 48000
 

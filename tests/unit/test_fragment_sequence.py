@@ -9,10 +9,10 @@ IOI = durata / F(t), miscelato col modello Truax di `distribution`.
 import numpy as np
 import pytest
 
-from src.core.fragment_sequence import FragmentSpec, build_fragment_sequence
-from src.parameters.parser import create_parameter
-from src.shared.seeding import rng_for
-from src.strategies.duration_strategy import build_duration_strategies
+from audiolayers.core.fragment_sequence import FragmentSpec, build_fragment_sequence
+from audiolayers.parameters.parser import create_parameter
+from audiolayers.shared.seeding import rng_for
+from audiolayers.strategies.duration_strategy import build_duration_strategies
 
 
 def make_sequence(target=2.0, fragment_block=None, fill_factor=1.0,

@@ -10,7 +10,7 @@ import textwrap
 import pytest
 import soundfile as sf
 
-from src.main import main
+from audiolayers.main import main
 from tests.unit.test_pool_source import FakeArchiveClient
 
 

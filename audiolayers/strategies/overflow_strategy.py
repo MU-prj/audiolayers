@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from src.shared.exceptions import InvalidFieldValueError
+from audiolayers.shared.exceptions import InvalidFieldValueError
 
 
 class OverflowStrategy(ABC):
