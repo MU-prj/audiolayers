@@ -30,6 +30,29 @@ layers:
     return score
 
 
+@pytest.fixture
+def hot_score(tmp_path: Path) -> Path:
+    """Partitura che sfora 0 dBFS: sorgente quasi a fondo scala, inviluppo
+    rettangolare (niente fade a smorzare il picco) e boost del master."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    t = np.arange(SR) / SR
+    sf.write(pool / "sine.wav",
+             (0.9 * np.sin(2 * np.pi * 440 * t)).astype(np.float32), SR)
+    score = tmp_path / "hot.yaml"
+    score.write_text(f"""\
+seed: 1
+master_volume: 6.0
+layers:
+  - layer_id: "l"
+    duration: 1.0
+    pool: "{pool.as_posix()}"
+    volume: 6.0
+    fragment: {{duration: 0.5, envelope: rectangle}}
+""", encoding="utf-8")
+    return score
+
+
 def run_cli(score, output, *flags):
     return subprocess.run(
         [sys.executable, "-m", "audiolayers.main", str(score), "-o", str(output),
@@ -80,3 +103,21 @@ def test_normalize_porta_il_picco_a_meno_1_dbfs(score, tmp_path):
     audio, _ = sf.read(str(tmp_path / "out.wav"), always_2d=True)
     peak_db = 20 * np.log10(np.abs(audio).max())
     assert peak_db == pytest.approx(-1.0, abs=0.05)
+
+
+@pytest.mark.e2e
+def test_clipping_segnalato_sullo_stdout(hot_score, tmp_path):
+    """Un mix oltre 0 dBFS: la CLI avverte e suggerisce --normalize (D16)."""
+    r = run_cli(hot_score, tmp_path / "out.wav")
+    assert r.returncode == 0, r.stderr
+    assert "CLIPPING" in r.stdout
+    assert "--normalize" in r.stdout
+
+
+@pytest.mark.e2e
+def test_normalize_doma_un_mix_che_clippava(hot_score, tmp_path):
+    r = run_cli(hot_score, tmp_path / "out.wav", "--normalize")
+    assert r.returncode == 0, r.stderr
+    assert "normalizzato" in r.stdout
+    audio, _ = sf.read(str(tmp_path / "out.wav"), always_2d=True)
+    assert np.abs(audio).max() == pytest.approx(10 ** (-1 / 20), abs=1e-4)

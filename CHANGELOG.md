@@ -27,6 +27,18 @@ segue il versionamento semantico.
 
 ### Added
 
+- CI GitHub Actions (`.github/workflows/ci.yml`): l'intera suite
+  (unit + integration + golden + e2e) gira a ogni push e pull request su
+  Python 3.11 e 3.12, con report di coverage a branch. Copertura del motore
+  di sintesi portata al 100% (riga e ramo); gli unici punti scoperti residui
+  sono le guardie di entrypoint (`__main__`) e un ramo GUI latente.
+- Test dello stadio di output del motore a livello integration
+  (`tests/integration/test_output_stage.py`, `render_score` in-process):
+  report del picco/CLIPPING, `--normalize`, risoluzione del formato
+  (flag esplicito e alias `aif`) e bit depth/PCM_24 — finora esercitati solo
+  dagli e2e via subprocess, quindi invisibili a coverage. Aggiunti anche gli
+  e2e mancanti per il CLIPPING e i percorsi d'errore di validazione
+  (envelope builder, parameter, catalogo, overflow) e del provisioning.
 - Issue #8 — politiche di provisioning: `provision.mode`
   (per-fragment/threshold/fixed) con `files`/`variety`, margini
   automatici `min_margin` e `max_factor`; blocco `provision` anche a

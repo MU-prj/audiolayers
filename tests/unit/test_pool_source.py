@@ -43,6 +43,22 @@ class FakeArchiveClient:
         write_wav(local_path, self._length)
 
 
+class GradualArchiveClient(FakeArchiveClient):
+    """Rivela un item idoneo in più a ogni ricerca: il pool cresce di uno
+    per giro, così c'è sempre progresso (mai lo stallo che fa `break`) ma il
+    fabbisogno non viene mai coperto entro _MAX_ROUNDS."""
+
+    def __init__(self):
+        super().__init__(n_items=10, length=5.0)
+        self._reveal = 0
+
+    def search(self, query, sort="downloads desc", max_items=100):
+        self._reveal += 1
+        self.queries.append(query)
+        self.max_items_seen.append(max_items)
+        yield from self._ids[:min(self._reveal, max_items)]
+
+
 DET_LAYER = {
     "layer_id": "det",
     "duration": 2.0,
@@ -155,6 +171,20 @@ class TestArchiveDiggerSource:
         client = FakeArchiveClient(n_items=2)
         ArchiveDiggerSource(client=client).ensure(layer, seed=1)
         assert count_suitable_files(pool, min_duration=0.5) == 2
+        assert "ATTENZIONE" in capsys.readouterr().out
+
+    def test_progresso_lento_esaurisce_i_giri_e_avvisa(
+            self, tmp_path, capsys):
+        """Archivio che stilla un file nuovo per giro: c'è progresso (mai
+        break per stallo) ma non basta entro _MAX_ROUNDS → il loop esaurisce
+        i giri, avvisa, e lascia proseguire il render col poco raccolto."""
+        pool = tmp_path / "pool"
+        layer = dict(DET_LAYER, pool=str(pool))       # servono 4 file
+        client = GradualArchiveClient()
+        ArchiveDiggerSource(client=client).ensure(layer, seed=1)
+        # 3 giri × +1 file = 3 idonei su 4: sotto il fabbisogno ma non zero
+        assert count_suitable_files(pool, min_duration=0.5) == 3
+        assert len(client.queries) == 3               # ha usato tutti i giri
         assert "ATTENZIONE" in capsys.readouterr().out
 
 

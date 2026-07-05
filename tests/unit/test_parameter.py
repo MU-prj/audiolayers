@@ -7,13 +7,37 @@ banda, con RNG namespaced iniettato (D14); i bounds fanno da guardia.
 import numpy as np
 import pytest
 
-from audiolayers.parameters.parameter import Parameter
+from audiolayers.parameters.parameter import Parameter, resolve
 from audiolayers.parameters.parameter_definitions import ParameterBounds
 from audiolayers.shared.seeding import rng_for
 from audiolayers.envelopes.envelope import Envelope
 
 VOLUME_BOUNDS = ParameterBounds(min_val=-120.0, max_val=12.0,
                                 min_range=0.0, max_range=24.0)
+
+
+class TestResolve:
+    def test_none_diventa_zero(self):
+        assert resolve(None, 0.0) == 0.0
+        assert resolve(None, 99.0) == 0.0
+
+    def test_scalare_resta_costante(self):
+        assert resolve(-6.0, 3.0) == -6.0
+
+    def test_envelope_valutato_al_tempo(self):
+        env = Envelope([[0.0, 0.0], [10.0, 10.0]])
+        assert resolve(env, 5.0) == pytest.approx(5.0)
+
+
+class TestRepr:
+    def test_repr_scalare_mostra_la_base(self):
+        p = Parameter("volume", base=-6.0, bounds=VOLUME_BOUNDS)
+        assert "volume" in repr(p) and "-6.0" in repr(p)
+
+    def test_repr_envelope_mostra_env(self):
+        p = Parameter("volume", base=Envelope([[0.0, 0.0], [1.0, 1.0]]),
+                      bounds=VOLUME_BOUNDS)
+        assert "Env" in repr(p)
 
 
 class TestBaseDeterministica:

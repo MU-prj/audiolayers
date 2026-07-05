@@ -1,5 +1,7 @@
 # audiolayers
 
+[![CI](https://github.com/MU-prj/audiolayers/actions/workflows/ci.yml/badge.svg)](https://github.com/MU-prj/audiolayers/actions/workflows/ci.yml)
+
 Ambiente compositivo dichiarativo per Computer Music. Legge una collezione di
 file audio e, seguendo una partitura YAML, dispone frammenti dei file lungo il
 tempo — controllando per ciascuno (o per tutti) apertura, punto di lettura,
@@ -48,8 +50,9 @@ passo-passo "Come scrivere uno YAML". Reference:
 
 Motore v1 completo (M0–M10): multi-layer, tendency masks su tutti i
 parametri, strategie di durata/selezione/overflow/inviluppo, mix con
-master envelope e report del picco. Suite: 158 test (unit, integration,
-golden, e2e). Le decisioni di design (D1–D20) sono nel
+master envelope e report del picco. Suite: 185 test (unit, integration,
+golden, e2e), motore di sintesi al 100% di copertura riga+ramo, eseguiti in
+CI a ogni push/PR. Le decisioni di design (D1–D20) sono nel
 [plan di bootstrap](docs/plans/done/2026-07-02-001-project-bootstrap-plan.md).
 
 Questo repo contiene il **solo motore**, installabile come pacchetto
@@ -68,9 +71,17 @@ python -m venv .venv
 ## Test
 
 ```bash
-make tests
+make tests            # suite completa
+# oppure sottoinsiemi:
+make unit             # solo unit
+make integration      # solo integration
+make golden           # confronto coi riferimenti versionati
+make e2e              # CLI reale end-to-end
 # oppure: python -m pytest
 ```
+
+La stessa suite completa gira in CI (GitHub Actions) a ogni push e pull
+request su Python 3.11 e 3.12, con report di coverage a branch.
 
 ## Licenza
 

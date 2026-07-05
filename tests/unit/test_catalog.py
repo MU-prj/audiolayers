@@ -6,12 +6,24 @@ delle Strategy, default degli inviluppi): la GUI si genera da /api/params
 e non può più divergere.
 """
 
+import pytest
+
 from audiolayers.parameters.catalog import catalog, catalog_entry
 from audiolayers.parameters.parameter_definitions import get_parameter_definition
 from audiolayers.strategies.fragment_envelope import (DEFAULT_ATTACK,
                                               available_envelopes)
 from audiolayers.strategies.overflow_strategy import available_overflow_strategies
 from audiolayers.strategies.selection_strategy import available_selection_strategies
+
+
+class TestErrori:
+    def test_catalog_entry_path_inesistente_solleva_keyerror(self):
+        with pytest.raises(KeyError, match="layer/non_esiste"):
+            catalog_entry("layer", "non_esiste")
+
+    def test_get_parameter_definition_nome_ignoto_solleva_keyerror(self):
+        with pytest.raises(KeyError, match="non definito"):
+            get_parameter_definition("parametro_fantasma")
 
 
 class TestCatalogo:

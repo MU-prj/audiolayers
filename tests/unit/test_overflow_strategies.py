@@ -49,6 +49,12 @@ class TestZeroPad:
         assert np.array_equal(seg, [7, 8, 9, 0, 0, 0])
         assert len(seg) == 6
 
+    def test_lettura_che_ci_sta_esatta_non_aggiunge_padding(self):
+        # start+length == len(source): niente da imbottire, ramo senza concat.
+        seg = ZeroPadOverflow().read(SOURCE, start=4, length=6)
+        assert np.array_equal(seg, [4, 5, 6, 7, 8, 9])
+        assert len(seg) == 6
+
 
 class TestFactory:
     def test_default_clamp_back(self):

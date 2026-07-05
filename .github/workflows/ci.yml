@@ -1,0 +1,63 @@
+name: CI
+
+# Esegue l'INTERA suite (unit + integration + golden + e2e) a ogni push e
+# pull request. I golden confrontano il render con riferimenti versionati a
+# SR nativo (nessun resampling → matematica numpy-pura, stabile fra versioni);
+# gli e2e invocano la CLI reale via subprocess.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    env:
+      # Dipendenza git privata opzionale (archivedigger, stessa org).
+      # Se il repo è pubblico non serve nulla; se è privato, imposta il
+      # secret GH_PAT (un PAT con scope repo) e verrà usato per il clone.
+      GH_PAT: ${{ secrets.GH_PAT }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Installa libsndfile (backend di soundfile)
+        run: sudo apt-get update && sudo apt-get install -y libsndfile1
+
+      - name: Autenticazione git per dipendenze private (opzionale)
+        if: ${{ env.GH_PAT != '' }}
+        run: |
+          git config --global \
+            url."https://x-access-token:${GH_PAT}@github.com/".insteadOf \
+            "https://github.com/"
+
+      - name: Installa le dipendenze
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-cov
+
+      - name: Suite completa (unit + integration + golden + e2e) con coverage
+        run: |
+          python -m pytest \
+            --cov=audiolayers --cov-branch \
+            --cov-report=term-missing --cov-report=xml
+
+      - name: Archivia il report di coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: ignore

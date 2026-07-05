@@ -61,6 +61,29 @@ class TestTimeMode:
             build_envelope([[0, 0], [1, 1]], time_mode="percentuale")
 
 
+class TestErroriDiValidazione:
+    def test_bool_non_e_un_numero_valido(self):
+        # bool è sottotipo di int in Python: va respinto PRIMA del ramo numerico.
+        with pytest.raises(InvalidFieldValueError, match="boolean"):
+            build_envelope(True)
+        with pytest.raises(InvalidFieldValueError, match="boolean"):
+            build_envelope(False)
+
+    def test_dict_senza_points_solleva_errore(self):
+        with pytest.raises(InvalidFieldValueError, match="points"):
+            build_envelope({"type": "linear"})
+
+    def test_tipo_grezzo_non_riconosciuto_solleva_errore(self):
+        with pytest.raises(InvalidFieldValueError, match="atteso numero"):
+            build_envelope("hanning")
+        with pytest.raises(InvalidFieldValueError, match="atteso numero"):
+            build_envelope(None)
+
+    def test_normalized_senza_duration_e_un_errore(self):
+        with pytest.raises(InvalidFieldValueError, match="duration"):
+            build_envelope([[0.0, 0.0], [1.0, 1.0]], time_mode="normalized")
+
+
 class TestClassificazione:
     def test_riconosce_le_forme_envelope(self):
         assert is_envelope_like([[0, 5], [1, 10]])
