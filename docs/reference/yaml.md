@@ -73,7 +73,7 @@ pan_range: 15.0              # ±15° di sparpagliamento intorno al centro
 | `layer_id` | `"layer"` | nome (namespacing del seed: cambia nome → cambiano i draw) |
 | `onset` | `0.0` | inizio del layer sulla timeline globale (secondi) |
 | `duration` | richiesto | durata-obiettivo; l'ultimo frammento non viene mai mozzato, quindi il layer può sforare |
-| `pool` | richiesto | cartella con i file sorgente (wav/aif/aiff/flac); mono al SR di progetto in ingresso, stereo downmixati |
+| `pool` | derivato | cartella con i file sorgente (wav/aif/aiff/flac); mono al SR di progetto in ingresso, stereo downmixati. Assente → `audio/pool/<layer_id>`, o la base `provision.pool` globale se dichiarata; `auto` → `<base>/<layer_id>` (vedi blocco `provision`) |
 | `solo` | — | se almeno un layer è in solo, suonano solo quelli |
 | `mute` | — | esclude il layer (ignorato se c'è un solo attivo) |
 | `provision` | — | ricerca Internet Archive per `--dig` (vedi sotto) |
@@ -157,6 +157,23 @@ Il blocco può vivere anche **a livello di partitura** (digger globale):
 in quel caso i blocchi dei layer vengono ignorati, i fabbisogni dei
 layer che condividono un pool si sommano e la policy si applica
 all'aggregato.
+
+Solo a livello di partitura il blocco accetta anche `pool`, la
+**cartella base** dei pool: i layer senza `pool` la condividono,
+`pool: auto` sul layer scarica nella sottocartella `<base>/<layer_id>`,
+un path esplicito resta un override. Senza base globale un layer senza
+`pool` deriva `audio/pool/<layer_id>`.
+
+```yaml
+provision:
+  pool: "downloads/"       # base condivisa (solo a livello partitura)
+layers:
+  - layer_id: mare         # → downloads/           (condivisa)
+  - layer_id: gabbiani
+    pool: auto             # → downloads/gabbiani   (sottocartella propria)
+  - layer_id: voci
+    pool: "campioni/voci/" # → campioni/voci        (override esplicito)
+```
 
 Senza `--dig` il blocco è ignorato e il pool resta una normale cartella
 locale. Con `--dig` orienta la ricerca su Internet Archive; i campi

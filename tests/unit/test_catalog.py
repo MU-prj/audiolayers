@@ -68,3 +68,10 @@ class TestCatalogo:
     def test_serializzabile_json(self):
         import json
         json.dumps(catalog())
+
+    def test_provision_pool_nel_catalogo_come_path_testuale(self):
+        """Issue #13: la base globale dei pool è dichiarabile da GUI;
+        default vuoto = nessuna base, valgono i default derivati."""
+        entry = catalog_entry("provision", "provision.pool")
+        assert entry["kind"] == "text"
+        assert entry["default"] == ""

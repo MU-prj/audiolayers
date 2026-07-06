@@ -11,7 +11,7 @@ from pathlib import Path
 from archivedigger.api import dig
 from archivedigger.config import Config
 
-from audiolayers.audio.pool import count_suitable_files
+from audiolayers.audio.pool import count_suitable_files, resolve_pool
 from audiolayers.provisioning.analyzer import (PoolRequirements,
                                        analyze_layer, apply_policy)
 
@@ -31,8 +31,13 @@ _POLICY_KEYS = ("mode", "count", "variety", "min_margin", "max_factor")
 
 
 def _split_policy(provision: dict | None) -> tuple[dict, dict]:
-    """Separa (policy, config-di-ricerca) dal blocco provision."""
+    """Separa (policy, config-di-ricerca) dal blocco provision.
+
+    `pool` (issue #13) non è né policy né ricerca: lo consuma il
+    resolver, alla Config archivedigger non deve arrivare (campi
+    sconosciuti = errore)."""
     rest = dict(provision or {})
+    rest.pop("pool", None)
     policy = {k: rest.pop(k) for k in list(rest) if k in _POLICY_KEYS}
     return policy, rest
 
@@ -49,9 +54,11 @@ class ArchiveDiggerSource:
         self._client = client
 
     def ensure(self, layer: dict, seed) -> None:
+        # Ramo per-layer: senza blocco provision globale non c'è base
+        # condivisa, il resolver applica default derivato/`auto`/override.
         policy, search_cfg = _split_policy(layer.get("provision"))
         requirements = apply_policy(analyze_layer(layer, seed), policy)
-        self.ensure_pool(Path(layer["pool"]), requirements, search_cfg)
+        self.ensure_pool(resolve_pool(layer), requirements, search_cfg)
 
     def ensure_pool(self, pool: Path, requirements: PoolRequirements,
                     search_cfg: dict) -> None:
@@ -132,7 +139,7 @@ def provision_score(score_path, client=None) -> None:
     groups: dict[str, PoolRequirements] = {}
     for layer in layers:
         req = analyze_layer(layer, seed)
-        key = str(Path(layer["pool"]))
+        key = str(resolve_pool(layer, data))
         if key in groups:
             g = groups[key]
             groups[key] = PoolRequirements(

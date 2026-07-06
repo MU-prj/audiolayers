@@ -477,7 +477,7 @@ Per ogni layer:
 | `layer_id` | `"layer"` | nome (usalo sempre: governa anche il seed) |
 | `onset` | `0.0` | quando entra sulla timeline (s) |
 | `duration` | — | durata-obiettivo (s, obbligatoria) |
-| `pool` | — | cartella sorgenti (obbligatoria) |
+| `pool` | derivato | cartella sorgenti; assente → `audio/pool/<layer_id>` (o la base `provision.pool` globale); `auto` → `<base>/<layer_id>` |
 | `solo` / `mute` | — | interruttori d'ascolto |
 | `time_mode` | `absolute` | `normalized` = tempi envelope in [0,1] |
 | `selection.strategy` | `sequential` | `rotation` \| `random` |

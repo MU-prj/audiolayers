@@ -154,3 +154,23 @@ layers:
     a = render(tmp_path, score(1))
     b = render(tmp_path, score(2))
     assert a.shape != b.shape or not np.array_equal(a, b)
+
+
+def test_layer_senza_pool_renderizza_dal_default_derivato(
+        tmp_path, monkeypatch):
+    """Issue #13: senza `pool` il render legge da audio/pool/<layer_id>,
+    lo stesso path che il provisioning avrebbe popolato."""
+    monkeypatch.chdir(tmp_path)
+    derived = tmp_path / "audio" / "pool" / "derivato"
+    derived.mkdir(parents=True)
+    t = np.arange(SR) / SR
+    sf.write(derived / "sine.wav",
+             (0.5 * np.sin(2 * np.pi * 440 * t)).astype(np.float32), SR)
+
+    audio = render(tmp_path, """\
+layers:
+  - layer_id: "derivato"
+    duration: 1.0
+    fragment: {duration: 0.5}
+""")
+    assert np.abs(audio).max() > 0.1     # suona davvero, dal pool derivato

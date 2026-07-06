@@ -4,11 +4,14 @@ Render e provisioning importano da qui: niente più import di privati
 del renderer attraverso i confini dei sottosistemi.
 """
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 import soundfile as sf
 
-from audiolayers.audio.pool import AUDIO_EXTENSIONS, count_suitable_files, scan_pool
+from audiolayers.audio.pool import (AUDIO_EXTENSIONS, count_suitable_files,
+                             resolve_pool, scan_pool)
 
 
 def write_wav(path, seconds, sample_rate=48000):
@@ -30,6 +33,44 @@ class TestScanPool:
 
     def test_estensioni_note(self):
         assert ".wav" in AUDIO_EXTENSIONS and ".flac" in AUDIO_EXTENSIONS
+
+
+class TestResolvePool:
+    """Issue #13: la cartella pool del layer è derivabile. La tabella
+    completa dei casi sta in docs/plans/2026-07-06-004-pool-dinamico.md."""
+
+    def test_pool_esplicito_senza_globale_resta_quello(self):
+        layer = {"layer_id": "a", "pool": "campioni/mare/"}
+        assert resolve_pool(layer) == Path("campioni/mare")
+
+    def test_pool_assente_senza_globale_deriva_dal_layer_id(self):
+        assert resolve_pool({"layer_id": "strato07"}) == \
+            Path("audio/pool/strato07")
+
+    def test_pool_assente_con_globale_condivide_la_base(self):
+        score = {"provision": {"pool": "downloads/"}}
+        assert resolve_pool({"layer_id": "a"}, score) == Path("downloads")
+        assert resolve_pool({"layer_id": "b"}, score) == Path("downloads")
+
+    def test_auto_con_globale_apre_la_sottocartella_del_layer(self):
+        score = {"provision": {"pool": "downloads/"}}
+        layer = {"layer_id": "strato00", "pool": "auto"}
+        assert resolve_pool(layer, score) == Path("downloads/strato00")
+
+    def test_pool_esplicito_vince_sulla_base_globale(self):
+        score = {"provision": {"pool": "downloads/"}}
+        layer = {"layer_id": "a", "pool": "campioni/mare/"}
+        assert resolve_pool(layer, score) == Path("campioni/mare")
+
+    def test_auto_senza_globale_equivale_ad_assente(self):
+        assert resolve_pool({"layer_id": "a", "pool": "auto"}) == \
+            Path("audio/pool/a")
+
+    def test_provision_globale_senza_pool_non_attiva_la_condivisione(self):
+        """Blocco provision di radice senza `pool` (issue #8 puro): i
+        layer senza override restano sul default derivato."""
+        score = {"provision": {"mode": "fixed", "count": 3}}
+        assert resolve_pool({"layer_id": "a"}, score) == Path("audio/pool/a")
 
 
 class TestCountSuitable:

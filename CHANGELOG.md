@@ -6,6 +6,19 @@ segue il versionamento semantico.
 
 ## [Unreleased]
 
+### Added
+
+- Pool dinamico per-layer (issue #13): la cartella `pool` di un layer è
+  ora derivabile. Nuova chiave `pool` nel blocco `provision` globale =
+  cartella base condivisa dai layer senza `pool` (fabbisogni aggregati
+  come da issue #8); `pool: auto` sul layer = sottocartella dinamica
+  `<base>/<layer_id>`; senza nulla il default è `audio/pool/<layer_id>`;
+  un path esplicito vince sempre (le partiture esistenti sono invariate).
+  Il resolver condiviso `resolve_pool` vive in `audiolayers/audio/pool.py`
+  ed è usato da provisioning e render; la voce `provision.pool` entra nel
+  catalogo parametri per la GUI. Piano:
+  `docs/plans/2026-07-06-004-pool-dinamico.md`.
+
 ### Changed
 
 - La dipendenza `archivedigger` è pinnata al tag rilasciato `v0.1.0`

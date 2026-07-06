@@ -14,7 +14,7 @@ import soundfile as sf
 import yaml
 
 from audiolayers.audio.pan import pan_stereo
-from audiolayers.audio.pool import scan_pool
+from audiolayers.audio.pool import resolve_pool, scan_pool
 from audiolayers.audio.source_loader import load_mono
 from audiolayers.core.layer_plan import active_layers, build_layer_plan
 from audiolayers.strategies.fragment_envelope import build_fragment_envelope
@@ -45,7 +45,12 @@ def render_score(score_path: Path, output_path: Path, *,
     placed = []
     for layer in layers:
         onset_frames = round(float(layer.get("onset", 0.0)) * sample_rate)
-        placed.append((onset_frames, _render_layer(layer, sample_rate, seed)))
+        # Il pool si risolve QUI, dove c'è la partitura intera: derivato,
+        # base globale condivisa o override (issue #13) — lo stesso path
+        # che vede il provisioning.
+        placed.append((onset_frames,
+                       _render_layer(layer, sample_rate, seed,
+                                     resolve_pool(layer, data))))
 
     total_frames = max(offset + len(buf) for offset, buf in placed)
     mix = np.zeros((total_frames, 2), dtype=np.float64)
@@ -137,14 +142,15 @@ def _resolve_seed(data: dict):
     return seed
 
 
-def _render_layer(layer: dict, sample_rate: int, seed) -> np.ndarray:
+def _render_layer(layer: dict, sample_rate: int, seed,
+                  pool_dir: Path) -> np.ndarray:
     """Renderizza un layer: sequenza di frammenti → timeline stereo."""
     layer_id = layer.get("layer_id", "layer")
 
     plan = build_layer_plan(layer, seed)
     params, fragments = plan.params, plan.fragments
 
-    pool_files = scan_pool(Path(layer["pool"]))
+    pool_files = scan_pool(pool_dir)
     # Precarica il pool una volta sola (mono, al SR di progetto, D13).
     sources = [load_mono(p, sample_rate) for p in pool_files]
     selection = build_selection_strategy(

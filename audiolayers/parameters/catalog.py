@@ -172,6 +172,12 @@ def catalog() -> dict:
                        "±gradi."),
         ],
         "provision": [
+            _free("provision.pool", "pool (base)", "", kind="text",
+                  info="Cartella base dei pool (solo digger globale): i "
+                       "layer senza 'pool' la condividono; 'pool: auto' "
+                       "sul layer scarica nella sottocartella "
+                       "<base>/<layer_id>. Vuoto = ogni layer deriva "
+                       "audio/pool/<layer_id>."),
             _free("provision.mode", "modalità file", "per-fragment",
                   kind="select",
                   options=["per-fragment", "threshold", "fixed"],
