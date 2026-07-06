@@ -101,6 +101,49 @@ class TestDiggerGlobale:
         assert count_suitable_files(pool, min_duration=0.5) == 8
         assert len(client.queries) == 1   # un solo giro per il pool
 
+    def test_pool_globale_condiviso_dai_layer_senza_pool(self, tmp_path):
+        """provision.pool di radice (issue #13): i layer senza `pool`
+        condividono la base (un gruppo, una query) e la chiave NON deve
+        finire nella Config archivedigger (campi sconosciuti = errore)."""
+        import yaml as _yaml
+
+        from audiolayers.provisioning.pool_source import provision_score
+        base = tmp_path / "downloads"
+        score = {
+            "seed": 1,
+            "provision": {"pool": str(base), "search": {"license": "cc"}},
+            "layers": [dict(DET_LAYER, layer_id="a"),
+                       dict(DET_LAYER, layer_id="b")],
+        }
+        path = tmp_path / "s.yaml"
+        path.write_text(_yaml.safe_dump(score), encoding="utf-8")
+        client = FakeArchiveClient()
+        provision_score(path, client=client)
+        assert count_suitable_files(base, min_duration=0.5) == 8
+        assert len(client.queries) == 1   # base condivisa = un solo gruppo
+
+    def test_auto_nel_globale_scava_la_sottocartella_del_layer(
+            self, tmp_path):
+        """`pool: auto` è l'opt-out dinamico: il layer non condivide la
+        base, scarica in <base>/<layer_id> come gruppo separato."""
+        import yaml as _yaml
+
+        from audiolayers.provisioning.pool_source import provision_score
+        base = tmp_path / "downloads"
+        score = {
+            "seed": 1,
+            "provision": {"pool": str(base)},
+            "layers": [dict(DET_LAYER, layer_id="a"),
+                       dict(DET_LAYER, layer_id="b", pool="auto")],
+        }
+        path = tmp_path / "s.yaml"
+        path.write_text(_yaml.safe_dump(score), encoding="utf-8")
+        client = FakeArchiveClient()
+        provision_score(path, client=client)
+        assert count_suitable_files(base, min_duration=0.5) == 4
+        assert count_suitable_files(base / "b", min_duration=0.5) == 4
+        assert len(client.queries) == 2   # due gruppi distinti
+
     def test_globale_ignora_i_provision_dei_layer(self, tmp_path):
         """Col digger globale i blocchi per-layer non contano: il fixed
         globale vince sul per-layer."""
@@ -121,6 +164,18 @@ class TestDiggerGlobale:
 
 
 class TestArchiveDiggerSource:
+    def test_layer_senza_pool_scarica_nel_default_derivato(
+            self, tmp_path, monkeypatch):
+        """Senza `pool` e senza base globale il layer scarica in
+        audio/pool/<layer_id> (issue #13, default derivato)."""
+        from pathlib import Path
+
+        monkeypatch.chdir(tmp_path)
+        ArchiveDiggerSource(client=FakeArchiveClient()).ensure(
+            dict(DET_LAYER), seed=1)
+        assert count_suitable_files(Path("audio/pool/det"),
+                                    min_duration=0.5) == 4
+
     def test_pool_vuoto_scarica_un_file_per_frammento(self, tmp_path):
         """Layer da 4 frammenti, pool vuoto → 4 file idonei scaricati."""
         pool = tmp_path / "pool"
