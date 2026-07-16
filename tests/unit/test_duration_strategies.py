@@ -48,6 +48,74 @@ class TestTendency:
         assert len(set(durs)) > 1
 
 
+class TestPatternConRipetizioniCasuali:
+    """Issue #10: una voce del pattern può ripetersi un numero casuale
+    di volte, con estrazioni seedate. Tre forme di `repeat`:
+    intero fisso, range "2-4", lista di scelte [2, 3, 4, 7]."""
+
+    def make(self, seed=42):
+        return RhythmicDurationStrategy(
+            bpm=120.0,
+            pattern=[0.5, {"value": 0.125, "repeat": "2-4"}],
+            rng=rng_for(seed, "l1", "rhythm"),
+        )
+
+    def test_ripetizioni_dentro_i_limiti_e_valori_giusti(self):
+        strat = self.make()
+        durs = [strat.duration(i, 0.0) for i in range(40)]
+        # a 120 bpm: 0.5 (semiminima x2) -> 1.0 s, 0.125 -> 0.25 s
+        assert set(round(d, 6) for d in durs) == {1.0, 0.25}
+        # tra due 1.0 consecutivi ci sono da 2 a 4 valori 0.25
+        runs, run = [], 0
+        for d in durs:
+            if abs(d - 0.25) < 1e-9:
+                run += 1
+            elif run:
+                runs.append(run); run = 0
+        assert runs and all(2 <= r <= 4 for r in runs)
+        assert len(set(runs)) > 1   # e' davvero casuale, non fisso
+
+    def test_stesso_seed_stessa_sequenza(self):
+        a = [self.make(7).duration(i, 0.0) for i in range(30)]
+        b = [self.make(7).duration(i, 0.0) for i in range(30)]
+        assert a == b
+
+    def test_scalari_puri_restano_ciclici_senza_rng(self):
+        strat = RhythmicDurationStrategy(bpm=120.0, pattern=[0.25, 0.125])
+        assert strat.duration(0, 0.0) == strat.duration(2, 0.0)
+
+    def test_repeat_lista_di_scelte(self):
+        """[2, 7]: le ripetizioni sono SOLO 2 o 7, mai 3..6."""
+        strat = RhythmicDurationStrategy(
+            bpm=120.0,
+            pattern=[0.5, {"value": 0.125, "repeat": [2, 7]}],
+            rng=rng_for(1, "l1", "rhythm"),
+        )
+        durs = [strat.duration(i, 0.0) for i in range(120)]
+        runs, run = [], 0
+        for d in durs:
+            if abs(d - 0.25) < 1e-9:
+                run += 1
+            elif run:
+                runs.append(run); run = 0
+        assert set(runs) <= {2, 7} and len(set(runs)) == 2
+
+    def test_repeat_intero_fisso(self):
+        strat = RhythmicDurationStrategy(
+            bpm=120.0, pattern=[{"value": 0.25, "repeat": 3}, 0.5],
+            rng=rng_for(1, "l1", "rhythm"))
+        durs = [round(strat.duration(i, 0.0), 6) for i in range(8)]
+        assert durs == [0.5, 0.5, 0.5, 1.0] * 2
+
+    def test_voce_dict_malformata_errore(self):
+        for bad in ("8-1", [0], "boh", []):
+            with pytest.raises(InvalidFieldValueError, match="repeat"):
+                build_duration_strategies(
+                    {"rhythm": {"bpm": 120,
+                                "pattern": [{"value": 0.2, "repeat": bad}]}},
+                    layer_id="l1", duration=30.0, seed=42)
+
+
 class TestFactory:
     """La factory ritorna la coppia (grano, ioi): quanto DURA il grano e
     OGNI QUANTO ne nasce uno. Senza rhythm coincidono; con rhythm la
