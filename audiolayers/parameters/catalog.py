@@ -105,7 +105,10 @@ def catalog() -> dict:
                   [0.25, 0.125, 0.125], kind="numlist", mode="rhythm",
                   info="Valori ritmici ciclici in frazioni di semibreve: "
                        "0.25 = semiminima (un movimento), 0.125 = croma, "
-                       "0.0625 = semicroma. Separati da virgola."),
+                       "0.0625 = semicroma. Separati da virgola. Una voce "
+                       "può ripetersi un numero casuale di volte (seedato): "
+                       "0.125x3 = tre volte fisse, 0.125x2-4 = da 2 a 4, "
+                       "0.125x[2,7] = solo 2 o 7."),
             _free("fragment.envelope", "inviluppo", "raised_cosine",
                   kind="select", options=available_envelopes(),
                   info="Forma d'ampiezza del grano: raised_cosine = campana "

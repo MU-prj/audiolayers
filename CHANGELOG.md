@@ -8,6 +8,12 @@ segue il versionamento semantico.
 
 ### Added
 
+- Ripetizioni casuali per voce nel pattern ritmico (issue #10): una voce
+  può essere un dict `{value, repeat}` e si ripete un numero di volte
+  estratto dall'RNG namespaced del layer (riproducibile col seed).
+  `repeat` accetta un intero fisso (`3`), un range (`"2-4"`) o una lista
+  di scelte (`[2, 7]`). I valori scalari restano ciclici semplici.
+
 - Pool dinamico per-layer (issue #13): la cartella `pool` di un layer è
   ora derivabile. Nuova chiave `pool` nel blocco `provision` globale =
   cartella base condivisa dai layer senza `pool` (fabbisogni aggregati

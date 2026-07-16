@@ -401,6 +401,24 @@ Con `fill_factor: 1` e un pattern ritmico ottieni attacchi su griglia:
 è il modo di scrivere ritmi veri. Il `bpm` accetta envelope
 (accelerando/ritardando).
 
+**Ripetizioni casuali per voce** — una voce del pattern può essere un
+dict `{value, repeat}`: a ogni giro il valore si ripete un numero di
+volte estratto dall'RNG del layer (riproducibile col seed). `repeat`
+accetta tre forme:
+
+```yaml
+    fragment:
+      rhythm:
+        bpm: 120
+        pattern:
+          - 0.5
+          - {value: 0.125, repeat: 3}        # fisso: sempre 3 volte
+          - {value: 0.125, repeat: "2-4"}    # range: da 2 a 4 volte
+          - {value: 0.25,  repeat: [2, 7]}   # scelte: solo 2 o 7 volte
+```
+
+I valori scalari restano ciclici semplici (retrocompatibile).
+
 **Come vengono scelti i file** — blocco `selection`:
 
 ```yaml
